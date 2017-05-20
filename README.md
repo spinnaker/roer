@@ -1,10 +1,11 @@
-# tilly
+# tiller
 
 An unofficial, thin CLI for Spinnaker.
 
 My objective in this project is to provide a client that's suitable for CI
 environments where you may want to publish Pipeline Templates, etc into 
-Spinnaker. For configuration and operations functionality, look to [halyard][halyard].
+Spinnaker. For a CLI to help configure and operate Spinnaker itself, use 
+[halyard][halyard]; config & operating utilities is not in Tiller's scope.
 
 You can download the most recent version from the [Releases][releases] tab.
 
