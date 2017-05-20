@@ -1,0 +1,6 @@
+schema: "1"
+pipeline:
+  application: spintest
+  name: mpt
+  template:
+    source: spinnaker://wait

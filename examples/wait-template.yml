@@ -1,0 +1,10 @@
+schema: "1"
+id: wait
+metadata:
+  scopes: [global]
+variables: []
+stages:
+- id: wait
+  type: wait
+  config:
+    waitTime: 5
