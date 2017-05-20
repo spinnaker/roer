@@ -11,12 +11,14 @@ type templatedPipelineRequest struct {
 	Plan   bool        `json:"plan"`
 }
 
+// TemplatedPipelineErrorResponse is returned when a pipeline template is invalid
 type TemplatedPipelineErrorResponse struct {
 	Errors  []TemplatedPipelineError `json:"errors"`
 	Message string                   `json:"message"`
 	Status  string                   `json:"status"`
 }
 
+// TemplatedPipelineError represents a single validation error
 type TemplatedPipelineError struct {
 	Location     string                   `json:"location"`
 	Message      string                   `json:"message"`
@@ -27,10 +29,14 @@ type TemplatedPipelineError struct {
 	NestedErrors []TemplatedPipelineError `json:"nestedErrors"`
 }
 
+// TaskRefResponse represents a task ID URL response following a submitted
+// orchestration.
 type TaskRefResponse struct {
 	Ref string `json:"ref"`
 }
 
+// ExecutionResponse wraps the generic response format of an orchestration
+// execution.
 type ExecutionResponse struct {
 	ID          string              `json:"id"`
 	Name        string              `json:"string"`
@@ -44,6 +50,9 @@ type ExecutionResponse struct {
 	Variables   []ExecutionVariable `json:"variables"`
 }
 
+// ExtractRetrofitError will attempt to find a Retrofit exception and decode
+// it into a RetrofitErrorResponse. This method will fatally error if the decode
+// cannot be performed successfully.
 func (e ExecutionResponse) ExtractRetrofitError() *RetrofitErrorResponse {
 	for _, v := range e.Variables {
 		if v.Key == "exception" {
@@ -57,6 +66,7 @@ func (e ExecutionResponse) ExtractRetrofitError() *RetrofitErrorResponse {
 	return nil
 }
 
+// ExecutionStep partially represents a single Orca execution step.
 type ExecutionStep struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
@@ -65,6 +75,7 @@ type ExecutionStep struct {
 	Status    string `json:"status"`
 }
 
+// ExecutionVariable represents a variable key/value pair from an execution.
 type ExecutionVariable struct {
 	Key   string      `json:"key"`
 	Value interface{} `json:"value"`
@@ -74,6 +85,7 @@ type exceptionVariable struct {
 	Details RetrofitErrorResponse `mapstructure:"details"`
 }
 
+// RetrofitErrorResponse represents a Retrofit error.
 type RetrofitErrorResponse struct {
 	Error        string   `mapstructure:"error"`
 	Errors       []string `mapstructure:"errors"`

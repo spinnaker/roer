@@ -15,8 +15,11 @@ import (
 	"github.com/urfave/cli"
 )
 
+// HTTPClientFactory creates a new http.Client from the cli.Context
 type HTTPClientFactory func(cc *cli.Context) (*http.Client, error)
 
+// DefaultHTTPClientFactory creates a basic http.Client that by default can
+// take an x509 cert/key pair for API authentication.
 func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 	if cc == nil {
 		logrus.Panic("cli context has not been set")

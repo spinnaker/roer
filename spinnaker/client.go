@@ -12,13 +12,10 @@ import (
 )
 
 var (
+	// ErrInvalidPipelineTemplate is returned when a plan or run fails due to an
+	// invalid template or configuration.
 	ErrInvalidPipelineTemplate = errors.New("pipeline template is invalid")
 )
-
-type ClientConfig struct {
-	HTTPClientFactory HTTPClientFactory
-	Endpoint          string
-}
 
 // Client is the Spinnaker API client
 // TODO rz - this interface is pretty bad
@@ -35,6 +32,7 @@ type client struct {
 	httpClient *http.Client
 }
 
+// New creates a new Spinnaker client
 func New(endpoint string, hc *http.Client) Client {
 	return &client{endpoint: endpoint, httpClient: hc}
 }
