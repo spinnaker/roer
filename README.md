@@ -52,6 +52,7 @@ VERSION:
 COMMANDS:
      publish  publish a pipeline template
      plan     validate a pipeline template and or plan a configuration
+     convert  converts an existing, non-templated pipeline config into a scaffolded template
 ```
 
 ```json
