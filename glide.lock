@@ -1,10 +1,8 @@
-hash: 23e882db45ee6ea80b74428584b2195f47e92500b828793ed8386b97ed23d2d7
-updated: 2017-05-20T13:21:53.479954328-07:00
+hash: 37ecd79aa7f64b9fdfc4cd6a62728d63691bd2b8a194701095c88d8b9debc8e6
+updated: 2017-05-21T15:26:56.424922195-07:00
 imports:
 - name: github.com/ghodss/yaml
   version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
-- name: github.com/go-yaml/yaml
-  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 - name: github.com/mitchellh/mapstructure
   version: 281073eb9eb092240d33ef253c404f1cca550309
 - name: github.com/pkg/errors
@@ -13,4 +11,10 @@ imports:
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/urfave/cli
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
+- name: golang.org/x/sys
+  version: dbc2be9168a660ef302e04b6ff6406de6f967473
+  subpackages:
+  - unix
+- name: gopkg.in/yaml.v2
+  version: f7716cbe52baa25d2e9b0d0da546fcf909fc16b4
 testImports: []

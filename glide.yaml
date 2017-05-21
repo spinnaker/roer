@@ -6,7 +6,7 @@ import:
   version: ~1.19.1
 - package: github.com/pkg/errors
   version: ~0.8.0
-- package: github.com/go-yaml/yaml
 - package: github.com/ghodss/yaml
   version: ~1.0.0
 - package: github.com/mitchellh/mapstructure
+- package: gopkg.in/yaml.v2
