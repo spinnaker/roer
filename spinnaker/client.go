@@ -17,6 +17,12 @@ var (
 	ErrInvalidPipelineTemplate = errors.New("pipeline template is invalid")
 )
 
+// ClientConfig is used to initialize the Client
+type ClientConfig struct {
+	HTTPClientFactory HTTPClientFactory
+	Endpoint          string
+}
+
 // Client is the Spinnaker API client
 // TODO rz - this interface is pretty bad
 type Client interface {
@@ -25,6 +31,7 @@ type Client interface {
 	// Run(configuration interface{}) ([]byte, error)
 	GetTask(refURL string) (*ExecutionResponse, error)
 	PollTaskStatus(refURL string, timeout time.Duration) (*ExecutionResponse, error)
+	GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfig, error)
 }
 
 type client struct {
@@ -43,6 +50,10 @@ func (c *client) startPipelineURL() string {
 
 func (c *client) pipelineTemplatesURL() string {
 	return c.endpoint + "/pipelineTemplates"
+}
+
+func (c *client) pipelineConfigURL(app, pipelineConfigID string) string {
+	return c.endpoint + fmt.Sprintf("/applications/%s/pipelineConfigs/%s", app, pipelineConfigID)
 }
 
 func (c *client) PublishTemplate(template map[string]interface{}, update bool) (*TaskRefResponse, error) {
@@ -149,4 +160,40 @@ func (c *client) PollTaskStatus(refURL string, timeout time.Duration) (*Executio
 	}
 
 	return nil, errors.New("exited poll loop before completion")
+}
+
+func (c *client) GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfig, error) {
+	url := c.pipelineConfigURL(app, pipelineConfigID)
+	logrus.WithField("url", url).Debug("getting url")
+	resp, err := c.httpClient.Get(url)
+	if err != nil {
+		return nil, errors.Wrap(err, "getting pipeline config")
+	}
+
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil && err != nil {
+			err = errors.Wrapf(err, "failed to close response body from %s", url)
+		}
+	}()
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to read response body from url %s", url)
+	}
+
+	fmt.Println(string(respBody))
+	fmt.Println(resp.StatusCode)
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println(string(respBody))
+		return nil, errors.New("get pipeline config failed")
+	}
+
+	var config PipelineConfig
+	if err := json.Unmarshal(respBody, &config); err != nil {
+		fmt.Println(string(respBody))
+		return nil, errors.Wrap(err, "failed unmarshaling pipeline config response")
+	}
+
+	return &config, nil
 }

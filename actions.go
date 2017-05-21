@@ -96,6 +96,35 @@ func PipelineTemplatePlanAction(clientConfig spinnaker.ClientConfig) cli.ActionF
 	}
 }
 
+func PipelineTemplateConvertAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		app := cc.Args().Get(0)
+		pipelineConfigID := cc.Args().Get(1)
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrap(err, "creating spinnaker client")
+		}
+
+		resp, err := client.GetPipelineConfig(app, pipelineConfigID)
+		if err != nil {
+			fmt.Println(resp)
+			return errors.Wrap(err, "getting pipeline config")
+		}
+
+		// TODO rz - Write custom marshaler to preserve key order
+		template, err := yaml.Marshal(convertPipelineToTemplate(*resp))
+		if err != nil {
+			return errors.Wrap(err, "marshaling template to YAML")
+		}
+
+		fmt.Println(generatedTemplateHeader)
+		fmt.Println(string(template))
+
+		return nil
+	}
+}
+
 func clientFromContext(cc *cli.Context, config spinnaker.ClientConfig) (spinnaker.Client, error) {
 	hc, err := config.HTTPClientFactory(cc)
 	if err != nil {

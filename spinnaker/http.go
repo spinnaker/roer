@@ -11,7 +11,6 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
-	"github.com/robzienert/tiller/cliutil"
 	"github.com/urfave/cli"
 )
 
@@ -29,13 +28,14 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 		Timeout: 10 * time.Second,
 	}
 
-	if cliutil.ContainsAllFlags(cc, []string{"certPath", "keyPath"}) {
-		cert, err := tls.LoadX509KeyPair(cc.String("certPath"), cc.String("keyPath"))
+	if cc.GlobalIsSet("certPath") && cc.GlobalIsSet("keyPath") {
+		logrus.Debug("Configuring TLS with pem cert/key pair")
+		cert, err := tls.LoadX509KeyPair(cc.GlobalString("certPath"), cc.GlobalString("keyPath"))
 		if err != nil {
 			return nil, errors.Wrap(err, "loading x509 keypair")
 		}
 
-		clientCA, err := ioutil.ReadFile(cc.String("certPath"))
+		clientCA, err := ioutil.ReadFile(cc.GlobalString("certPath"))
 		if err != nil {
 			return nil, errors.Wrap(err, "loading client CA")
 		}
@@ -44,16 +44,21 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 		clientCertPool.AppendCertsFromPEM(clientCA)
 
 		tlsConfig := &tls.Config{
-			Certificates:       []tls.Certificate{cert},
-			RootCAs:            clientCertPool,
+			MinVersion:               tls.VersionTLS12,
+			PreferServerCipherSuites: true,
+			Certificates:             []tls.Certificate{cert},
+			// TODO rz - Add support for self-signed certs; this doesn't work
+			// RootCAs:                  clientCertPool,
 			InsecureSkipVerify: true,
 		}
-
-		tlsConfig.BuildNameToCertificate()
 
 		c.Transport = &http.Transport{
 			TLSClientConfig: tlsConfig,
 		}
+	}
+
+	if c.Transport == nil {
+		logrus.Warn("HTTP client not configured with TLS transport")
 	}
 
 	return &c, nil

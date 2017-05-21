@@ -60,6 +60,18 @@ func NewTiller(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					},
 					Action: tiller.PipelineTemplatePlanAction(clientConfig),
 				},
+				{
+					Name:      "convert",
+					Usage:     "converts an existing, non-templated pipeline config into a scaffolded template",
+					ArgsUsage: "[appName] [pipelineName]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 2 {
+							return errors.New("appName and pipelineName args are required")
+						}
+						return nil
+					},
+					Action: tiller.PipelineTemplateConvertAction(clientConfig),
+				},
 				// {
 				// 	Name:      "run",
 				// 	Usage:     "run a pipeline",
@@ -97,26 +109,9 @@ func NewTiller(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 		if cc.Bool("verbose") {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
-		if hasX509Files(cc, true) {
-			logrus.WithFields(logrus.Fields{
-				"certPath": cc.String("certPath"),
-				"keyPath":  cc.String("keyPath"),
-			}).Error("certPath and keyPath must be defined")
-		}
-		if hasX509Files(cc, false) {
-			validateFileExists("certPath", cc.String("certPath"))
-			validateFileExists("keyPath", cc.String("keyPath"))
-		}
 		return nil
 	}
 	return app
-}
-
-func hasX509Files(cc *cli.Context, any bool) bool {
-	if any {
-		return cc.IsSet("certPath") || cc.IsSet("keyPath")
-	}
-	return cc.IsSet("certPath") && cc.IsSet("keyPath")
 }
 
 func validateFileExists(name, f string) {

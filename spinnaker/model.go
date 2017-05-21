@@ -5,6 +5,9 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// M allows certain responses to contain untyped data (most Spinnaker interfaces)
+type M map[string]interface{}
+
 type templatedPipelineRequest struct {
 	Type   string      `json:"type"`
 	Config interface{} `json:"config"`
@@ -93,4 +96,19 @@ type RetrofitErrorResponse struct {
 	ResponseBody string   `mapstructure:"responseBody"`
 	Status       int      `mapstructure:"status"`
 	URL          string   `mapstructure:"url"`
+}
+
+type PipelineConfig struct {
+	M
+
+	Name            string                   `json:"name"`
+	Description     string                   `json:"description"`
+	ExecutionEngine string                   `json:"executionEngine"`
+	Parallel        bool                     `json:"parallel"`
+	LimitConcurrent bool                     `json:"limitConcurrent"`
+	Stages          []map[string]interface{} `json:"stages"`
+	Triggers        []map[string]interface{} `json:"triggers"`
+	Parameters      []map[string]interface{} `json:"parameterConfig"`
+	Notifications   []map[string]interface{} `json:"notifications"`
+	LastModifiedBy  string                   `json:"lastModifiedBy"`
 }
