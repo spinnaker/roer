@@ -1,11 +1,11 @@
-# tiller
+# roer
 
-An unofficial, thin CLI for Spinnaker.
+A thin CLI for Spinnaker.
 
-My objective in this project is to provide a client that's suitable for CI
-environments where you may want to publish Pipeline Templates, etc into 
-Spinnaker. For a CLI to help configure and operate Spinnaker itself, use 
-[halyard][halyard]; config & operating utilities are not in Tiller's scope.
+This project is aimed to provide a thin, limited client that's suitable for
+CI environments where you may want to publish Pipeline Templates or update
+pipeline configurations in Spinnaker. For a CLI to help configure and operate
+use [halyard][halyard]: config & operating utilities are not in Roer's scope.
 
 You can download the most recent version from the [Releases][releases] tab.
 
@@ -15,7 +15,7 @@ Export `SPINNAKER_API` pointing to your Gate API.
 
 ```
 NAME:
-   tiller - Spinnaker CLI
+   roer - Spinnaker CLI
 
 USAGE:
    main [global options] command [command options] [arguments...]
@@ -41,10 +41,10 @@ GLOBAL OPTIONS:
 
 ```
 NAME:
-   tiller pipeline-template - pipeline template tasks
+   roer pipeline-template - pipeline template tasks
 
 USAGE:
-   tiller pipeline-template  command [command options] [arguments...]
+   roer pipeline-template  command [command options] [arguments...]
 
 VERSION:
    dev
@@ -57,7 +57,7 @@ COMMANDS:
 
 ```json
 $ SPINNAKER_API=https://localhost:7002 \
-  go run cmd/tiller/main.go pipeline-template plan examples/wait-config-invalid.yml
+  go run cmd/roer/main.go pipeline-template plan examples/wait-config-invalid.yml
 {
   "errors": [
     {
@@ -89,6 +89,6 @@ your own `main.go`. This can be useful if you need to provide custom auth logic,
 or if you want to add new commands, but not contribute them directly to the
 project.
 
-[releases]: https://github.com/robzienert/tiller/releases
+[releases]: https://github.com/spinnaker/roer/releases
 [glide]: https://github.com/Masterminds/glide
 [halyard]: https://github.com/spinnaker/halyard

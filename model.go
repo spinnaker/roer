@@ -1,6 +1,6 @@
-package tiller
+package roer
 
-import "github.com/robzienert/tiller/spinnaker"
+import "github.com/spinnaker/roer/spinnaker"
 
 type PipelineTemplate struct {
 	Schema        string                   `json:"schema"`

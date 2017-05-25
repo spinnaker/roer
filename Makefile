@@ -1,4 +1,4 @@
-BINARY=tiller
+BINARY=roer
 
 VERSION=`git rev-parse HEAD`
 

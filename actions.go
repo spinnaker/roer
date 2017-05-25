@@ -1,4 +1,4 @@
-package tiller
+package roer
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
-	"github.com/robzienert/tiller/spinnaker"
+	"github.com/spinnaker/roer/spinnaker"
 	"github.com/urfave/cli"
 )
 

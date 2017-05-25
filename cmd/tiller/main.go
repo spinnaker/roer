@@ -4,8 +4,8 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/robzienert/tiller/cmd"
-	"github.com/robzienert/tiller/spinnaker"
+	"github.com/spinnaker/roer/cmd"
+	"github.com/spinnaker/roer/spinnaker"
 )
 
 // version is set via ldflags
@@ -22,7 +22,7 @@ func main() {
 		Endpoint:          os.Getenv("SPINNAKER_API"),
 		HTTPClientFactory: spinnaker.DefaultHTTPClientFactory,
 	}
-	if err := cmd.NewTiller(version, config).Run(os.Args); err != nil {
+	if err := cmd.NewRoer(version, config).Run(os.Args); err != nil {
 		os.Exit(1)
 	}
 }

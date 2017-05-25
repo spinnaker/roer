@@ -5,19 +5,19 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
-	"github.com/robzienert/tiller"
-	"github.com/robzienert/tiller/spinnaker"
+	"github.com/spinnaker/roer"
+	"github.com/spinnaker/roer/spinnaker"
 	"github.com/urfave/cli"
 )
 
-// NewTiller returns a new instance of the OSS Tiller application
-func NewTiller(version string, clientConfig spinnaker.ClientConfig) *cli.App {
+// NewRoer returns a new instance of the OSS roer application
+func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 	cli.VersionFlag.Name = "version"
 	cli.HelpFlag.Name = "help"
 	cli.HelpFlag.Hidden = true
 
 	app := cli.NewApp()
-	app.Name = "tiller"
+	app.Name = "roer"
 	app.Usage = "Spinnaker CLI"
 	app.Version = version
 	app.Commands = []cli.Command{
@@ -35,7 +35,7 @@ func NewTiller(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 						}
 						return nil
 					},
-					Action: tiller.PipelineSaveAction(clientConfig),
+					Action: roer.PipelineSaveAction(clientConfig),
 				},
 			},
 		},
@@ -59,7 +59,7 @@ func NewTiller(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 							Usage: "update the given pipeline",
 						},
 					},
-					Action: tiller.PipelineTemplatePublishAction(clientConfig),
+					Action: roer.PipelineTemplatePublishAction(clientConfig),
 				},
 				{
 					Name:  "plan",
@@ -76,7 +76,7 @@ func NewTiller(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 						}
 						return nil
 					},
-					Action: tiller.PipelineTemplatePlanAction(clientConfig),
+					Action: roer.PipelineTemplatePlanAction(clientConfig),
 				},
 				{
 					Name:      "convert",
@@ -88,7 +88,7 @@ func NewTiller(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 						}
 						return nil
 					},
-					Action: tiller.PipelineTemplateConvertAction(clientConfig),
+					Action: roer.PipelineTemplateConvertAction(clientConfig),
 				},
 				// {
 				// 	Name:      "run",
@@ -100,7 +100,7 @@ func NewTiller(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 				// 		}
 				// 		return nil
 				// 	},
-				// 	Action: tiller.PipelineTemplateRunAction(clientConfig),
+				// 	Action: roer.PipelineTemplateRunAction(clientConfig),
 				// },
 			},
 		},
@@ -109,10 +109,6 @@ func NewTiller(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 		cli.BoolFlag{
 			Name:  "verbose, v",
 			Usage: "show debug messages",
-		},
-		cli.BoolFlag{
-			Name:  "silent, s",
-			Usage: "silence log messages except panics",
 		},
 		cli.StringFlag{
 			Name:  "certPath, c",
