@@ -24,12 +24,12 @@ VERSION:
    dev
 
 COMMANDS:
+     pipeline           pipeline tasks
      pipeline-template  pipeline template tasks
      help, h            Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --verbose, -v               show debug messages
-   --silent, -s                silence log messages except panics
    --certPath value, -c value  HTTPS x509 cert path
    --keyPath value, -k value   HTTPS x509 key path
    --version                   print the version
