@@ -12,5 +12,8 @@ build: clean
 	env GOOS=windows GOARCH=386 go build -o build/${BINARY}-windows-386 ./cmd/roer/main.go
 	env GOOS=windows GOARCH=amd64 go build -o build/${BINARY}-windows-amd64 ./cmd/roer/main.go
 
+package:
+	find build -name '${BINARY}-*' -print -exec zip '{}'.zip '{}' \;
+
 clean:
 	rm -rf build
