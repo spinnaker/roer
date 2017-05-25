@@ -32,6 +32,7 @@ type Client interface {
 	GetTask(refURL string) (*ExecutionResponse, error)
 	PollTaskStatus(refURL string, timeout time.Duration) (*ExecutionResponse, error)
 	GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfig, error)
+	SavePipelineConfig(pipelineConfig PipelineConfig) error
 }
 
 type client struct {
@@ -52,8 +53,16 @@ func (c *client) pipelineTemplatesURL() string {
 	return c.endpoint + "/pipelineTemplates"
 }
 
+func (c *client) pipelineConfigsURL(app string) string {
+	return c.endpoint + fmt.Sprintf("/applications/%s/pipelineConfigs", app)
+}
+
 func (c *client) pipelineConfigURL(app, pipelineConfigID string) string {
-	return c.endpoint + fmt.Sprintf("/applications/%s/pipelineConfigs/%s", app, pipelineConfigID)
+	return c.pipelineConfigsURL(app) + "/" + pipelineConfigID
+}
+
+func (c *client) pipelinesURL() string {
+	return c.endpoint + "/pipelines"
 }
 
 func (c *client) PublishTemplate(template map[string]interface{}, update bool) (*TaskRefResponse, error) {
@@ -181,12 +190,17 @@ func (c *client) GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfi
 		return nil, errors.Wrapf(err, "failed to read response body from url %s", url)
 	}
 
-	fmt.Println(string(respBody))
-	fmt.Println(resp.StatusCode)
-
 	if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusNotFound {
+			return nil, nil
+		}
 		fmt.Println(string(respBody))
 		return nil, errors.New("get pipeline config failed")
+	}
+
+	// TODO rz - HACK: Spinnaker bug returning 200 on a pipeline config that isn't found
+	if len(respBody) == 0 {
+		return nil, nil
 	}
 
 	var config PipelineConfig
@@ -196,4 +210,20 @@ func (c *client) GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfi
 	}
 
 	return &config, nil
+}
+
+func (c *client) SavePipelineConfig(pipelineConfig PipelineConfig) error {
+	url := c.pipelinesURL()
+	logrus.WithField("url", url).Debug("saving pipeline")
+	resp, respBody, err := c.postJSON(url, pipelineConfig)
+	if err != nil {
+		return errors.Wrap(err, "save pipeline config")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println(respBody)
+		return errors.New("plan request failed")
+	}
+
+	return nil
 }

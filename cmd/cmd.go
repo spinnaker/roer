@@ -22,6 +22,24 @@ func NewTiller(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 	app.Version = version
 	app.Commands = []cli.Command{
 		{
+			Name:  "pipeline",
+			Usage: "pipeline tasks",
+			Subcommands: []cli.Command{
+				{
+					Name:      "save",
+					Usage:     "save a pipeline configuration",
+					ArgsUsage: "[configuration.yml]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 1 {
+							return errors.New("path to configuration file is required")
+						}
+						return nil
+					},
+					Action: tiller.PipelineSaveAction(clientConfig),
+				},
+			},
+		},
+		{
 			Name:  "pipeline-template",
 			Usage: "pipeline template tasks",
 			Subcommands: []cli.Command{

@@ -99,16 +99,26 @@ type RetrofitErrorResponse struct {
 }
 
 type PipelineConfig struct {
-	M
+	ID                   string                   `json:"id,omitempty"`
+	Type                 string                   `json:"type,omitempty"`
+	Name                 string                   `json:"name"`
+	Application          string                   `json:"application"`
+	Description          string                   `json:"description,omitempty"`
+	ExecutionEngine      string                   `json:"executionEngine,omitempty"`
+	Parallel             bool                     `json:"parallel"`
+	LimitConcurrent      bool                     `json:"limitConcurrent"`
+	KeepWaitingPipelines bool                     `json:"keepWaitingPipelines"`
+	Locked               PipelineLock             `json:"locked"`
+	Stages               []map[string]interface{} `json:"stages,omitempty"`
+	Triggers             []map[string]interface{} `json:"triggers,omitempty"`
+	Parameters           []map[string]interface{} `json:"parameterConfig,omitempty"`
+	Notifications        []map[string]interface{} `json:"notifications,omitempty"`
+	LastModifiedBy       string                   `json:"lastModifiedBy"`
+	Config               interface{}              `json:"config,omitempty"`
+}
 
-	Name            string                   `json:"name"`
-	Description     string                   `json:"description"`
-	ExecutionEngine string                   `json:"executionEngine"`
-	Parallel        bool                     `json:"parallel"`
-	LimitConcurrent bool                     `json:"limitConcurrent"`
-	Stages          []map[string]interface{} `json:"stages"`
-	Triggers        []map[string]interface{} `json:"triggers"`
-	Parameters      []map[string]interface{} `json:"parameterConfig"`
-	Notifications   []map[string]interface{} `json:"notifications"`
-	LastModifiedBy  string                   `json:"lastModifiedBy"`
+type PipelineLock struct {
+	AllowUnlockUI bool   `json:"allowUnlockUi"`
+	Description   string `json:"description"`
+	UI            bool   `json:"ui"`
 }

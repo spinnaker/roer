@@ -7,10 +7,58 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/ghodss/yaml"
+	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"github.com/robzienert/tiller/spinnaker"
 	"github.com/urfave/cli"
 )
+
+// PipelineSaveAction creates the ActionFunc for saving pipeline configurations.
+func PipelineSaveAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		configFile := cc.Args().Get(0)
+		logrus.WithField("file", configFile).Debug("Reading config")
+		dat, err := ioutil.ReadFile(configFile)
+		if err != nil {
+			return errors.Wrapf(err, "reading config file: %s", configFile)
+		}
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		var m map[string]interface{}
+		if err := yaml.Unmarshal(dat, &m); err != nil {
+			return errors.Wrapf(err, "unmarshaling config")
+		}
+
+		if _, ok := m["schema"]; !ok {
+			logrus.Error("Pipeline save command currently only supports pipeline template configurations")
+		}
+
+		var config PipelineConfiguration
+		if err := mapstructure.Decode(m, &config); err != nil {
+			return errors.Wrap(err, "converting map to struct")
+		}
+
+		existingConfig, err := client.GetPipelineConfig(config.Pipeline.Application, config.Pipeline.Name)
+		if err != nil {
+			return errors.Wrap(err, "seaching for existing pipeline config")
+		}
+
+		payload := config.ToClient()
+		if existingConfig != nil {
+			payload.ID = existingConfig.ID
+		}
+
+		if err := client.SavePipelineConfig(payload); err != nil {
+			return errors.Wrap(err, "saving pipeline config")
+		}
+
+		return nil
+	}
+}
 
 // PipelineTemplatePublishAction creates the ActionFunc for publishing pipeline
 // templates.
@@ -110,6 +158,10 @@ func PipelineTemplateConvertAction(clientConfig spinnaker.ClientConfig) cli.Acti
 		if err != nil {
 			fmt.Println(resp)
 			return errors.Wrap(err, "getting pipeline config")
+		}
+
+		if resp == nil {
+			logrus.Error("could not find pipeline config")
 		}
 
 		// TODO rz - Write custom marshaler to preserve key order
