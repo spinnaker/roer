@@ -27,7 +27,7 @@ type ClientConfig struct {
 // TODO rz - this interface is pretty bad
 type Client interface {
 	PublishTemplate(template map[string]interface{}, update bool) (*TaskRefResponse, error)
-	Plan(configuration interface{}) ([]byte, error)
+	Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error)
 	// Run(configuration interface{}) ([]byte, error)
 	GetTask(refURL string) (*ExecutionResponse, error)
 	PollTaskStatus(refURL string, timeout time.Duration) (*ExecutionResponse, error)
@@ -91,11 +91,12 @@ func (c *client) PublishTemplate(template map[string]interface{}, update bool) (
 	return &ref, nil
 }
 
-func (c *client) Plan(configuration interface{}) ([]byte, error) {
+func (c *client) Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error) {
 	body := templatedPipelineRequest{
-		Type:   "templatedPipeline",
-		Config: configuration,
-		Plan:   true,
+		Type:     "templatedPipeline",
+		Config:   configuration,
+		Template: template,
+		Plan:     true,
 	}
 
 	resp, respBody, err := c.postJSON(c.startPipelineURL(), body)

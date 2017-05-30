@@ -47,17 +47,17 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					Name:      "publish",
 					Usage:     "publish a pipeline template",
 					ArgsUsage: "[template.yml]",
-					Before: func(cc *cli.Context) error {
-						if cc.NArg() != 1 {
-							return errors.New("path to template file is required")
-						}
-						return nil
-					},
 					Flags: []cli.Flag{
 						cli.BoolFlag{
 							Name:  "update, u",
 							Usage: "update the given pipeline",
 						},
+					},
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 1 {
+							return errors.New("path to template file is required")
+						}
+						return nil
 					},
 					Action: roer.PipelineTemplatePublishAction(clientConfig),
 				},
@@ -70,6 +70,12 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 		final pipeline JSON that would be executed.
 					`,
 					ArgsUsage: "[configuration.yml]",
+					Flags: []cli.Flag{
+						cli.StringFlag{
+							Name:  "template, t",
+							Usage: "local template to inline while planning",
+						},
+					},
 					Before: func(cc *cli.Context) error {
 						if cc.NArg() != 1 {
 							return errors.New("path to configuration file is required")
@@ -120,7 +126,7 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 		},
 	}
 	app.Before = func(cc *cli.Context) error {
-		if cc.Bool("verbose") {
+		if cc.GlobalBool("verbose") {
 			logrus.SetLevel(logrus.DebugLevel)
 		}
 		return nil

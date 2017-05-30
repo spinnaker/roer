@@ -9,9 +9,10 @@ import (
 type M map[string]interface{}
 
 type templatedPipelineRequest struct {
-	Type   string      `json:"type"`
-	Config interface{} `json:"config"`
-	Plan   bool        `json:"plan"`
+	Type     string      `json:"type"`
+	Config   interface{} `json:"config"`
+	Template interface{} `json:"template,omitempty"`
+	Plan     bool        `json:"plan"`
 }
 
 // TemplatedPipelineErrorResponse is returned when a pipeline template is invalid

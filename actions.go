@@ -68,7 +68,8 @@ func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.Acti
 	return func(cc *cli.Context) error {
 		templateFile := cc.Args().Get(0)
 		logrus.WithField("file", templateFile).Debug("Reading template")
-		dat, err := ioutil.ReadFile(templateFile)
+
+		template, err := readYamlFile(templateFile)
 		if err != nil {
 			return errors.Wrapf(err, "reading template file: %s", templateFile)
 		}
@@ -78,13 +79,8 @@ func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.Acti
 			return errors.Wrapf(err, "creating spinnaker client")
 		}
 
-		var m map[string]interface{}
-		if err := yaml.Unmarshal(dat, &m); err != nil {
-			return errors.Wrapf(err, "converting JSON to memory-struct")
-		}
-
 		logrus.Info("Publishing template")
-		ref, err := client.PublishTemplate(m, cc.Bool("update"))
+		ref, err := client.PublishTemplate(template, cc.Bool("update"))
 		if err != nil {
 			return errors.Wrap(err, "publishing template")
 		}
@@ -116,9 +112,12 @@ func PipelineTemplatePlanAction(clientConfig spinnaker.ClientConfig) cli.ActionF
 		configFile := cc.Args().Get(0)
 
 		logrus.WithField("file", configFile).Debug("Reading config")
-		dat, err := ioutil.ReadFile(configFile)
-		if err != nil {
-			return errors.Wrapf(err, "reading configuration file: %s", configFile)
+		config, err := readYamlFile(configFile)
+
+		var template map[string]interface{}
+		if cc.IsSet("template") {
+			logrus.WithField("file", cc.String("template")).Debug("Reading template")
+			template, err = readYamlFile(cc.String("template"))
 		}
 
 		client, err := clientFromContext(cc, clientConfig)
@@ -126,18 +125,13 @@ func PipelineTemplatePlanAction(clientConfig spinnaker.ClientConfig) cli.ActionF
 			return errors.Wrapf(err, "creating spinnaker client")
 		}
 
-		var m map[string]interface{}
-		if err := yaml.Unmarshal(dat, &m); err != nil {
-			return errors.Wrapf(err, "converting JSON to memory-struct")
-		}
-
-		resp, err := client.Plan(m)
+		resp, err := client.Plan(config, template)
 		if err != nil {
 			if err == spinnaker.ErrInvalidPipelineTemplate {
 				prettyPrintJSON(resp)
 				return nil
 			}
-			fmt.Println(resp)
+			fmt.Println(string(resp))
 			return errors.Wrap(err, "planning configuration")
 		}
 
@@ -185,4 +179,18 @@ func clientFromContext(cc *cli.Context, config spinnaker.ClientConfig) (spinnake
 		return nil, errors.Wrap(err, "creating http client from context")
 	}
 	return spinnaker.New(config.Endpoint, hc), nil
+}
+
+func readYamlFile(f string) (map[string]interface{}, error) {
+	configDat, err := ioutil.ReadFile(f)
+	if err != nil {
+		return nil, errors.Wrapf(err, "reading file: %s", f)
+	}
+
+	var m map[string]interface{}
+	if err := yaml.Unmarshal(configDat, &m); err != nil {
+		return nil, errors.Wrapf(err, "unmarshaling yaml in %s", f)
+	}
+
+	return m, nil
 }
