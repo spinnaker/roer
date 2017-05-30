@@ -47,6 +47,8 @@ func PipelineSaveAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 			return errors.Wrap(err, "seaching for existing pipeline config")
 		}
 
+		// TODO rz - orca should probably auto-set the pipeline config id somehow so
+		// executions correctly show up in the UI.
 		payload := config.ToClient()
 		if existingConfig != nil {
 			payload.ID = existingConfig.ID

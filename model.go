@@ -74,6 +74,7 @@ func (c PipelineConfiguration) ToClient() spinnaker.PipelineConfig {
 		keepWaitingPipelines = false
 	}
 	return spinnaker.PipelineConfig{
+		ID:                   c.Pipeline.PipelineConfigID,
 		Type:                 "templatedPipeline",
 		Name:                 c.Pipeline.Name,
 		Application:          c.Pipeline.Application,
@@ -100,10 +101,11 @@ type PipelineConfig struct {
 }
 
 type PipelineConfigurationDefinition struct {
-	Application string                 `json:"application"`
-	Name        string                 `json:"name"`
-	Template    TemplateSource         `json:"template"`
-	Variables   map[string]interface{} `json:"variables"`
+	Application      string                 `json:"application"`
+	Name             string                 `json:"name"`
+	Template         TemplateSource         `json:"template"`
+	PipelineConfigID string                 `json:"pipelineConfigId"`
+	Variables        map[string]interface{} `json:"variables"`
 }
 
 type TemplateSource struct {
