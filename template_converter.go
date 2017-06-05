@@ -86,7 +86,7 @@ func convertStages(stages []map[string]interface{}) (l []PipelineTemplateStage) 
 		}
 		l = append(l, stage)
 	}
-	return nil
+	return
 }
 
 func buildDependsOn(stages []map[string]interface{}, reqStageRefIDs []string) (l []string) {
