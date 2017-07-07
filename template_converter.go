@@ -31,6 +31,7 @@ func convertPipelineToTemplate(pipelineConfig spinnaker.PipelineConfig) Pipeline
 			Name:        pipelineConfig.Name,
 			Description: pipelineConfig.Description,
 			Owner:       pipelineConfig.LastModifiedBy,
+			Scopes:      []string{pipelineConfig.Application},
 		},
 		Protect: false,
 		Configuration: PipelineTemplateConfig{
@@ -64,7 +65,7 @@ func convertNotifications(notifications []map[string]interface{}) (l []map[strin
 	return
 }
 
-func convertStages(stages []map[string]interface{}) (l []PipelineTemplateStage) {
+func convertStages(stages []map[string]interface{}) []PipelineTemplateStage {
 	convertToStringSlice := func(input interface{}) []string {
 		if input == nil {
 			return []string{}
@@ -76,6 +77,7 @@ func convertStages(stages []map[string]interface{}) (l []PipelineTemplateStage) 
 		return s
 	}
 
+	l := []PipelineTemplateStage{}
 	for _, s := range stages {
 		stage := PipelineTemplateStage{
 			ID:        s["type"].(string) + s["refId"].(string),
@@ -86,10 +88,11 @@ func convertStages(stages []map[string]interface{}) (l []PipelineTemplateStage) 
 		}
 		l = append(l, stage)
 	}
-	return
+	return l
 }
 
-func buildDependsOn(stages []map[string]interface{}, reqStageRefIDs []string) (l []string) {
+func buildDependsOn(stages []map[string]interface{}, reqStageRefIDs []string) []string {
+	l := []string{}
 	for _, refID := range reqStageRefIDs {
 		for _, s := range stages {
 			if targetRefID, ok := s["refId"]; ok {
@@ -99,13 +102,17 @@ func buildDependsOn(stages []map[string]interface{}, reqStageRefIDs []string) (l
 			}
 		}
 	}
-	return
+	return l
 }
 
 func getStageConfig(s map[string]interface{}) map[string]interface{} {
-	delete(s, "type")
-	delete(s, "name")
-	delete(s, "refId")
-	delete(s, "requisiteStageRefIds")
-	return s
+	config := map[string]interface{}{}
+	for k, v := range s {
+		config[k] = v
+	}
+	delete(config, "type")
+	delete(config, "name")
+	delete(config, "refId")
+	delete(config, "requisiteStageRefIds")
+	return config
 }
