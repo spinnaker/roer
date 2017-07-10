@@ -109,7 +109,6 @@ type PipelineConfig struct {
 	Parallel             bool                     `json:"parallel"`
 	LimitConcurrent      bool                     `json:"limitConcurrent"`
 	KeepWaitingPipelines bool                     `json:"keepWaitingPipelines"`
-	Locked               PipelineLock             `json:"locked"`
 	Stages               []map[string]interface{} `json:"stages,omitempty"`
 	Triggers             []map[string]interface{} `json:"triggers,omitempty"`
 	Parameters           []map[string]interface{} `json:"parameterConfig,omitempty"`
