@@ -83,11 +83,6 @@ func (c PipelineConfiguration) ToClient() spinnaker.PipelineConfig {
 		LimitConcurrent:      limitConcurrent,
 		KeepWaitingPipelines: keepWaitingPipelines,
 		Config:               c,
-		Locked: spinnaker.PipelineLock{
-			AllowUnlockUI: false,
-			UI:            true,
-			Description:   "Manual edits are not allowed on templated pipelines",
-		},
 	}
 }
 
