@@ -88,3 +88,28 @@ func (c *client) postJSON(url string, body interface{}) (resp *http.Response, re
 
 	return resp, respBody, nil
 }
+
+func (c *client) delete(url string) (resp *http.Response, respBody []byte, err error) {
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "failed to create delete request object")
+	}
+
+	resp, err = c.httpClient.Do(req)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "failed to make delete request to %s", url)
+	}
+
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil && err != nil {
+			err = errors.Wrapf(err, "failed to close response body from %s", url)
+		}
+	}()
+
+	respBody, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "failed to read response body from url %s", url)
+	}
+
+	return resp, respBody, nil
+}
