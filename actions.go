@@ -173,6 +173,41 @@ func PipelineTemplateConvertAction(clientConfig spinnaker.ClientConfig) cli.Acti
 	}
 }
 
+func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		pipelineTemplateId := cc.Args().Get(0)
+		
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrap(err, "creating spinnaker client")
+		}
+
+		logrus.Info("Deleting template")
+		ref, err := client.DeleteTemplate(pipelineTemplateId)
+		if err != nil {
+			return errors.Wrap(err, "deleting pipeline template")
+		}
+
+		resp, err := client.PollTaskStatus(ref.Ref, 1*time.Minute)
+		if err != nil {
+			return errors.Wrap(err, "polling task status")
+		}
+
+		if resp.Status == "TERMINAL" {
+			logrus.WithField("status", resp.Status).Error("Task failed")
+			if retrofitErr := resp.ExtractRetrofitError(); retrofitErr != nil {
+				prettyPrintJSON([]byte(retrofitErr.ResponseBody))
+			} else {
+				fmt.Printf("%#v\n", resp)
+			}
+		} else {
+			logrus.WithField("status", resp.Status).Info("Task completed")
+		}
+		
+		return nil
+	}
+}
+
 func clientFromContext(cc *cli.Context, config spinnaker.ClientConfig) (spinnaker.Client, error) {
 	hc, err := config.HTTPClientFactory(cc)
 	if err != nil {
