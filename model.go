@@ -7,8 +7,8 @@ type PipelineTemplate struct {
 	ID            string                   `json:"id"`
 	Metadata      PipelineTemplateMetadata `json:"metadata"`
 	Protect       bool                     `json:"protect"`
-	Configuration PipelineTemplateConfig   `json:"configuration"`
-	Variables     []interface{}            `json:"variables"`
+	Configuration PipelineTemplateConfig   `json:"configuration,omitempty"`
+	Variables     []interface{}            `json:"variables,omitempty"`
 	Stages        []PipelineTemplateStage  `json:"stages"`
 }
 
@@ -16,20 +16,20 @@ type PipelineTemplateMetadata struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
 	Owner       string   `json:"owner"`
-	Scopes      []string `json:"scopes"`
+	Scopes      []string `json:"scopes,omitempty"`
 }
 
 type PipelineTemplateConfig struct {
-	ConcurrentExecutions map[string]bool          `json:"concurrentExecutions"`
-	Triggers             []map[string]interface{} `json:"triggers"`
-	Parameters           []map[string]interface{} `json:"parameters"`
-	Notifications        []map[string]interface{} `json:"notifications"`
+	ConcurrentExecutions map[string]bool          `json:"concurrentExecutions,omitempty"`
+	Triggers             []map[string]interface{} `json:"triggers,omitempty"`
+	Parameters           []map[string]interface{} `json:"parameters,omitempty"`
+	Notifications        []map[string]interface{} `json:"notifications,omitempty"`
 }
 
 type PipelineTemplateStage struct {
 	ID        string                 `json:"id"`
 	Type      string                 `json:"type"`
-	DependsOn []string               `json:"dependsOn"`
+	DependsOn []string               `json:"dependsOn,omitempty"`
 	Name      string                 `json:"name"`
 	Config    map[string]interface{} `json:"config"`
 }
@@ -37,15 +37,15 @@ type PipelineTemplateStage struct {
 type PipelineTemplateModule struct {
 	ID         string                   `json:"id"`
 	Usage      string                   `json:"usage"`
-	Variables  []map[string]interface{} `json:"variables"`
-	When       []string                 `json:"when"`
+	Variables  []map[string]interface{} `json:"variables,omitempty"`
+	When       []string                 `json:"when,omitempty"`
 	Definition map[string]interface{}   `json:"definition"`
 }
 
 type PipelineTemplatePartial struct {
 	ID        string                   `json:"id"`
 	Usage     string                   `json:"usage"`
-	Variables []map[string]interface{} `json:"variables"`
+	Variables []map[string]interface{} `json:"variables,omitempty"`
 	Stages    []PipelineTemplateStage  `json:"stages"`
 }
 
@@ -55,8 +55,8 @@ type PipelineConfiguration struct {
 	Pipeline      PipelineConfigurationDefinition `json:"pipeline"`
 	Configuration PipelineConfig                  `json:"configuration"`
 	Stages        []PipelineTemplateStage         `json:"stages"`
-	Modules       []PipelineTemplateModule        `json:"modules"`
-	Partials      []PipelineTemplatePartial       `json:"partials"`
+	Modules       []PipelineTemplateModule        `json:"modules,omitempty"`
+	Partials      []PipelineTemplatePartial       `json:"partials,omitempty"`
 }
 
 func (c PipelineConfiguration) ToClient() spinnaker.PipelineConfig {
