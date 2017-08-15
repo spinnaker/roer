@@ -27,11 +27,34 @@ type PipelineTemplateConfig struct {
 }
 
 type PipelineTemplateStage struct {
-	ID        string                 `json:"id"`
-	Type      string                 `json:"type"`
-	DependsOn []string               `json:"dependsOn,omitempty"`
-	Name      string                 `json:"name"`
-	Config    map[string]interface{} `json:"config"`
+	ID                 string                                  `json:"id"`
+	Type               string                                  `json:"type"`
+	DependsOn          []string                                `json:"dependsOn,omitempty"`
+	Inject             PipelineTemplateStageInjection          `json:"inject,omitempty"`
+	Name               string                                  `json:"name"`
+	Config             map[string]interface{}                  `json:"config"`
+	Notifications      []map[string]interface{}                `json:"notifications,omitempty"`
+	Comments           string                                  `json:"comments,omitempty"`
+	When               []string                                `json:"when,omitempty"`
+	InheritanceControl PipelineTemplateStageInheritanceControl `json:"inheritanceControl,omitempty"`
+}
+
+type PipelineTemplateStageInjection struct {
+	First  bool     `json:"first,omitempty"`
+	Last   bool     `json:"last,omitempty"`
+	Before []string `json:"before,omitempty"`
+	After  []string `json:"after,omitempty"`
+}
+
+type PipelineTemplateStageInheritanceControl struct {
+	Merge   []InheritanceControlRule `json:"merge,omitempty"`
+	Replace []InheritanceControlRule `json:"replace,omitempty"`
+	Remove  []InheritanceControlRule `json:"remove,omitempty"`
+}
+
+type InheritanceControlRule struct {
+	Path  string      `json:"path"`
+	Value interface{} `json:"value"`
 }
 
 type PipelineTemplateModule struct {

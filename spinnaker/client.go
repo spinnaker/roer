@@ -28,7 +28,7 @@ type ClientConfig struct {
 type Client interface {
 	PublishTemplate(template map[string]interface{}, update bool) (*TaskRefResponse, error)
 	Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error)
-	DeleteTemplate(templateId string) (*TaskRefResponse, error)
+	DeleteTemplate(templateID string) (*TaskRefResponse, error)
 	// Run(configuration interface{}) ([]byte, error)
 	GetTask(refURL string) (*ExecutionResponse, error)
 	PollTaskStatus(refURL string, timeout time.Duration) (*ExecutionResponse, error)
@@ -115,23 +115,23 @@ func (c *client) Plan(configuration map[string]interface{}, template map[string]
 	return respBody, nil
 }
 
-func (c *client) DeleteTemplate(templateId string) (*TaskRefResponse, error) {
-	url := c.pipelineTemplatesURL() + "/" + templateId
+func (c *client) DeleteTemplate(templateID string) (*TaskRefResponse, error) {
+	url := c.pipelineTemplatesURL() + "/" + templateID
 	resp, respBody, err := c.delete(url)
 	if err != nil {
 		return nil, errors.Wrap(err, "delete request failed")
 	}
-	
+
 	if resp.StatusCode != http.StatusAccepted {
 		return nil, errors.New("delete request failed")
 	}
-	
+
 	var ref TaskRefResponse
 	if err := json.Unmarshal(respBody, &ref); err != nil {
 		fmt.Println(string(respBody))
 		return nil, errors.New("failed to unmarshall delete template response")
 	}
-	
+
 	return &ref, nil
 }
 
@@ -243,7 +243,8 @@ func (c *client) SavePipelineConfig(pipelineConfig PipelineConfig) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println(respBody)
+		fmt.Println(resp.StatusCode)
+		fmt.Println(string(respBody))
 		return errors.New("plan request failed")
 	}
 

@@ -176,7 +176,7 @@ func PipelineTemplateConvertAction(clientConfig spinnaker.ClientConfig) cli.Acti
 func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		pipelineTemplateId := cc.Args().Get(0)
-		
+
 		client, err := clientFromContext(cc, clientConfig)
 		if err != nil {
 			return errors.Wrap(err, "creating spinnaker client")
@@ -203,7 +203,7 @@ func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.Actio
 		} else {
 			logrus.WithField("status", resp.Status).Info("Task completed")
 		}
-		
+
 		return nil
 	}
 }
