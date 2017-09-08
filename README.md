@@ -82,6 +82,10 @@ Install [glide][glide], then install the dependencies:
 
 `$ glide i`
 
+To run:
+
+`$ go run cmd/roer/main.go`
+
 # Extending
 
 You can extend the interface, as well as inject your own HTTP client by providing
