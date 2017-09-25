@@ -141,6 +141,10 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 			Name:  "keyPath, k",
 			Usage: "HTTPS x509 key path",
 		},
+		cli.StringFlag{
+			Name:  "apiSession, as",
+			Usage: "your active api session",
+		},
 	}
 	app.Before = func(cc *cli.Context) error {
 		if cc.GlobalBool("verbose") {
