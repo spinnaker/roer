@@ -7,6 +7,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"net/http/cookiejar"
+	"net/url"
+	"os"
 	"time"
 
 	"github.com/Sirupsen/logrus"
@@ -23,9 +26,26 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 	if cc == nil {
 		logrus.Panic("cli context has not been set")
 	}
+	var c http.Client
 
-	c := http.Client{
-		Timeout: 10 * time.Second,
+	if cc.GlobalIsSet("apiSession") {
+		cookieJar, _ := cookiejar.New(nil)
+		var cookies []*http.Cookie
+		cookie := &http.Cookie{
+			Name:   "SESSION",
+			Value:  cc.GlobalString("apiSession"),
+		}
+		cookies = append(cookies, cookie)
+		u, _ := url.Parse(os.Getenv("SPINNAKER_API"))
+		cookieJar.SetCookies(u, cookies)
+		c = http.Client{
+			Timeout: 10 * time.Second,
+			Jar: cookieJar,
+		}
+	} else {
+		c = http.Client{
+			Timeout: 10 * time.Second,
+		}
 	}
 
 	if cc.GlobalIsSet("certPath") && cc.GlobalIsSet("keyPath") {
