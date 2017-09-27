@@ -32,15 +32,15 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 		cookieJar, _ := cookiejar.New(nil)
 		var cookies []*http.Cookie
 		cookie := &http.Cookie{
-			Name:   "SESSION",
-			Value:  cc.GlobalString("apiSession"),
+			Name:  "SESSION",
+			Value: cc.GlobalString("apiSession"),
 		}
 		cookies = append(cookies, cookie)
 		u, _ := url.Parse(os.Getenv("SPINNAKER_API"))
 		cookieJar.SetCookies(u, cookies)
 		c = http.Client{
 			Timeout: 10 * time.Second,
-			Jar: cookieJar,
+			Jar:     cookieJar,
 		}
 	} else {
 		c = http.Client{
@@ -91,6 +91,26 @@ func (c *client) postJSON(url string, body interface{}) (resp *http.Response, re
 	}
 
 	resp, err = c.httpClient.Post(url, "application/json", bytes.NewBuffer(payload))
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "posting to %s", url)
+	}
+
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil && err != nil {
+			err = errors.Wrapf(err, "failed to close response body from %s", url)
+		}
+	}()
+
+	respBody, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "failed to read response body from url %s", url)
+	}
+
+	return resp, respBody, nil
+}
+
+func (c *client) getJSON(url string) (resp *http.Response, respBody []byte, err error) {
+	resp, err = c.httpClient.Get(url)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "posting to %s", url)
 	}

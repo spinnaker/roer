@@ -9,6 +9,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
+	"strconv"
 )
 
 var (
@@ -26,7 +27,7 @@ type ClientConfig struct {
 // Client is the Spinnaker API client
 // TODO rz - this interface is pretty bad
 type Client interface {
-	PublishTemplate(template map[string]interface{}, update bool) (*TaskRefResponse, error)
+	PublishTemplate(template map[string]interface{}) (*TaskRefResponse, error)
 	Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error)
 	DeleteTemplate(templateID string) (*TaskRefResponse, error)
 	// Run(configuration interface{}) ([]byte, error)
@@ -66,10 +67,30 @@ func (c *client) pipelinesURL() string {
 	return c.endpoint + "/pipelines"
 }
 
-func (c *client) PublishTemplate(template map[string]interface{}, update bool) (*TaskRefResponse, error) {
+func (c *client) templateExists(id string) (bool, error) {
+	url := c.pipelineTemplatesURL() + "/" + id
+	resp, _, err := c.getJSON(url)
+	if err != nil {
+		return false, err
+	}
+	if resp.StatusCode == http.StatusNotFound {
+		return false, nil
+	}
+	if resp.StatusCode == http.StatusOK {
+		return true, nil
+	}
+	return false, errors.New("Unable to determine state of the pipeline template " + id + ", status: " + strconv.Itoa(resp.StatusCode))
+}
+
+func (c *client) PublishTemplate(template map[string]interface{}) (*TaskRefResponse, error) {
 	url := c.pipelineTemplatesURL()
-	if update {
-		url = url + "/" + template["id"].(string)
+	id := template["id"].(string)
+	exists, err := c.templateExists(id)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to check status of template")
+	}
+	if exists {
+		url = url + "/" + id
 	}
 
 	resp, respBody, err := c.postJSON(url, template)
