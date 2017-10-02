@@ -167,7 +167,7 @@ func (c *client) GetTask(refURL string) (*ExecutionResponse, error) {
 }
 
 func (c *client) PollTaskStatus(refURL string, timeout time.Duration) (*ExecutionResponse, error) {
-	logrus.Info("Waiting for task to complete...")
+	logrus.WithField("refURL", refURL).Info("Waiting for task to complete...")
 
 	timer := time.NewTimer(timeout)
 	t := time.NewTicker(1 * time.Second)
