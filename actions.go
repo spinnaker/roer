@@ -66,6 +66,9 @@ func PipelineSaveAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 // templates.
 func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
+		if cc.Bool("update") {
+			logrus.Warn("The `update` flag is deprecated, `publish` always creates or updates the template")
+		}
 		templateFile := cc.Args().Get(0)
 		logrus.WithField("file", templateFile).Debug("Reading template")
 
@@ -80,7 +83,7 @@ func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.Acti
 		}
 
 		logrus.Info("Publishing template")
-		ref, err := client.PublishTemplate(template, cc.Bool("update"))
+		ref, err := client.PublishTemplate(template)
 		if err != nil {
 			return errors.Wrap(err, "publishing template")
 		}

@@ -45,12 +45,12 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 			Subcommands: []cli.Command{
 				{
 					Name:      "publish",
-					Usage:     "publish a pipeline template",
+					Usage:     "publish a pipeline template, will create or update a template",
 					ArgsUsage: "[template.yml]",
 					Flags: []cli.Flag{
 						cli.BoolFlag{
 							Name:  "update, u",
-							Usage: "update the given pipeline",
+							Usage: "DEPRECATED: update the given pipeline, the default action always creates or updates",
 						},
 					},
 					Before: func(cc *cli.Context) error {
