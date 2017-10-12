@@ -52,6 +52,10 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 							Name:  "update, u",
 							Usage: "DEPRECATED: update the given pipeline, the default action always creates or updates",
 						},
+						cli.BoolFlag{
+							Name:  "skipPlan, s",
+							Usage: "skip the plan dependent pipelines safety feature",
+						},
 					},
 					Before: func(cc *cli.Context) error {
 						if cc.NArg() != 1 {

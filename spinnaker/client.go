@@ -7,9 +7,10 @@ import (
 	"net/http"
 	"time"
 
+	"strconv"
+
 	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
-	"strconv"
 )
 
 var (
@@ -27,7 +28,7 @@ type ClientConfig struct {
 // Client is the Spinnaker API client
 // TODO rz - this interface is pretty bad
 type Client interface {
-	PublishTemplate(template map[string]interface{}) (*TaskRefResponse, error)
+	PublishTemplate(template map[string]interface{}, skipPlan bool) (*TaskRefResponse, error)
 	Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error)
 	DeleteTemplate(templateID string) (*TaskRefResponse, error)
 	// Run(configuration interface{}) ([]byte, error)
@@ -82,7 +83,7 @@ func (c *client) templateExists(id string) (bool, error) {
 	return false, errors.New("Unable to determine state of the pipeline template " + id + ", status: " + strconv.Itoa(resp.StatusCode))
 }
 
-func (c *client) PublishTemplate(template map[string]interface{}) (*TaskRefResponse, error) {
+func (c *client) PublishTemplate(template map[string]interface{}, skipPlan bool) (*TaskRefResponse, error) {
 	url := c.pipelineTemplatesURL()
 	id := template["id"].(string)
 	exists, err := c.templateExists(id)
@@ -91,6 +92,9 @@ func (c *client) PublishTemplate(template map[string]interface{}) (*TaskRefRespo
 	}
 	if exists {
 		url = url + "/" + id
+	}
+	if skipPlan {
+		url = url + "?skipPlanDependents=true"
 	}
 
 	resp, respBody, err := c.postJSON(url, template)
