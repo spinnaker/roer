@@ -40,6 +40,8 @@ type Client interface {
 	GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfig, error)
 	SavePipelineConfig(pipelineConfig PipelineConfig) error
 	DeletePipeline(app string, pipelineID string) error
+	ListPipeline(app string) ([]PipelineConfig, error)
+	DeletePipeline(app, pipelineConfigID string) error
 }
 
 type client struct {
@@ -72,6 +74,7 @@ func (c *client) pipelinesURL() string {
 	return c.endpoint + "/pipelines"
 }
 
+
 func (c *client) applicationTasksURL(app string) string {
 	return c.endpoint + fmt.Sprintf("/applications/%s/tasks", app)
 }
@@ -86,6 +89,10 @@ func (c *client) applicationsURL() string {
 
 func (c *client) pipelineURL(app string, pipelineID string) string {
 	return fmt.Sprintf("%s/pipelines/%s/%s", c.endpoint, app, pipelineID)
+}
+
+func (c *client) pipelineDeleteURL(app, pipelineConfigID string) string {
+	return c.endpoint + fmt.Sprintf("/pipelines/%s/%s", app, pipelineConfigID)
 }
 
 func (c *client) templateExists(id string) (bool, error) {
@@ -349,6 +356,45 @@ func (c *client) GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfi
 	}
 
 	return &config, nil
+}
+
+func (c *client) DeletePipeline(app, pipelineConfigID string) error {
+	url := c.pipelineDeleteURL(app, pipelineConfigID)
+	logrus.WithField("url", url).Debug("deleting pipeline")
+	req, err := http.NewRequest("DELETE", url, nil)
+	if err != nil {
+		return errors.Wrap(err, "Creating delete pipeline request")
+	}
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return errors.Wrap(err, "Requesting pipeline delete")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("Unexpected return from delete request: " + strconv.Itoa(resp.StatusCode))
+	}
+
+	return nil
+}
+
+func (c *client) ListPipeline(app string) ([]PipelineConfig, error) {
+	url := c.pipelineConfigsURL(app)
+	resp, respBody, err := c.getJSON(url)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to get pipeline list")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Unable to fetch pipeline list: " + strconv.Itoa(resp.StatusCode))
+	}
+
+	var pipelineInfo []PipelineConfig
+	if err := json.Unmarshal(respBody, &pipelineInfo); err != nil {
+		fmt.Println(string(respBody))
+		return nil, errors.New("unmarshaling pipeline list")
+	}
+
+	return pipelineInfo, nil
 }
 
 func (c *client) SavePipelineConfig(pipelineConfig PipelineConfig) error {

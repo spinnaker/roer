@@ -1,6 +1,7 @@
 package roer
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"time"
@@ -152,6 +153,107 @@ func AppListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 
 		for _, app := range appInfo {
 			fmt.Println(app.Name)
+		}
+
+		return nil
+	}
+}
+
+// Save a pipeline from json source
+func PipelineSaveJsonAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		jsonFile := cc.Args().Get(0)
+		logrus.WithField("file", jsonFile).Debug("Reading JSON payload")
+		dat, err := ioutil.ReadFile(jsonFile)
+		if err != nil {
+			return errors.Wrapf(err, "reading JSON file: %s", jsonFile)
+		}
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		var newConfig spinnaker.PipelineConfig
+		if err := json.Unmarshal(dat, &newConfig); err != nil {
+			return errors.Wrap(err, "Unmarshaling JSON pipeline")
+		}
+
+		existingConfig, err := client.GetPipelineConfig(newConfig.Application, newConfig.Name)
+		if err != nil {
+			return errors.Wrap(err, "seaching for existing pipeline config")
+		}
+
+		if existingConfig != nil {
+			newConfig.ID = existingConfig.ID
+		}
+
+		if err := client.SavePipelineConfig(newConfig); err != nil {
+			return errors.Wrap(err, "saving pipeline config")
+		}
+
+		return nil
+	}
+}
+
+func PipelineListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		appName := cc.Args().Get(0)
+		logrus.WithField("app", appName).Debug("Fetching pipelines")
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		pipelineInfo, err := client.ListPipeline(appName)
+		if err != nil {
+			return errors.Wrap(err, "Fetching pipelines")
+		}
+
+		for _, pipeline := range pipelineInfo {
+			fmt.Println(pipeline.Name)
+		}
+		return nil
+	}
+}
+
+func PipelineGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		appName := cc.Args().Get(0)
+		pipelineName := cc.Args().Get(1)
+		logrus.WithField("app", appName).WithField("pipelineName", pipelineName).Debug("Fetching pipeline")
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		pipelineConfig, err := client.GetPipelineConfig(appName, pipelineName)
+		if err != nil {
+			return errors.Wrap(err, "Fetching pipeline")
+		}
+
+		jsonStr, _ := json.Marshal(pipelineConfig)
+		fmt.Println(string(jsonStr))
+		return nil
+	}
+}
+
+func PipelineDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		appName := cc.Args().Get(0)
+		pipelineName := cc.Args().Get(1)
+		logrus.WithField("app", appName).WithField("pipelineName", pipelineName).Debug("Deleting pipeline")
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		err = client.DeletePipeline(appName, pipelineName)
+		if err != nil {
+			return errors.Wrap(err, "Deleting pipeline")
 		}
 		return nil
 	}
