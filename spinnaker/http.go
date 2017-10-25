@@ -100,7 +100,7 @@ func (c *client) postJSON(url string, body interface{}) (resp *http.Response, re
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "marshaling body to json")
 	}
-
+	logrus.WithField("url", url).Debug("http post")
 	resp, err = c.httpClient.Post(url, "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "posting to %s", url)

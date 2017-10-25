@@ -12,9 +12,64 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spinnaker/roer/spinnaker"
 	"gopkg.in/urfave/cli.v1"
+	"regexp"
+	"strings"
+)
+
+type FileType int
+
+const (
+  JSON FileType = iota
+	YAML
 )
 
 // PipelineSaveAction creates the ActionFunc for saving pipeline configurations.
+func PipelineExecAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		appName := cc.Args().Get(0)
+		pipelineName := cc.Args().Get(1)
+		monitor := cc.Bool("monitor")
+		numRetries := cc.Int("retry")
+
+		logrus.WithFields(logrus.Fields{
+			"app":      appName,
+			"pipeline": pipelineName,
+			"monitor": 	monitor,
+			"retries": 	numRetries,
+		}).Info("Executing Pipeline...")
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		resp, err := client.ExecPipeline(appName, pipelineName)
+		if err != nil {
+			return errors.Wrapf(err, "couldn't execute pipeline")
+		}
+		fmt.Printf("Ref task id: %s\n", resp.Ref)
+		if monitor {
+			var err error
+			var execResp *spinnaker.ExecutionResponse
+			for retryCounter:=0; retryCounter <= numRetries; {
+				retryCounter += 1
+				logrus.Infof("Polling tasks status, retry number: %d", retryCounter)
+				execResp, err = client.PollTaskStatus(resp.Ref, 30*time.Minute)
+				if err != nil {
+					logrus.WithField("exec_response", execResp).Errorf("Executing response error", err)
+				}
+			}
+			if err != nil {
+				return err
+			}
+			if execResp != nil && execResp.Status != "SUCCEEDED" {
+				return fmt.Errorf("pipeline did not complete with a SUCCESS status.  Ended with status: %s", execResp.Status)
+			}
+		}
+		return nil
+	}
+}
+
 func PipelineSaveAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		configFile := cc.Args().Get(0)
