@@ -129,7 +129,7 @@ func AppGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 
 		if exists == false {
 			fmt.Println("App does not exist or insufficient permission")
-			return errors.New("Could not fetch app info")
+			return fmt.Errorf("Could not fetch app info")
 		}
 		prettyPrintJSON(appInfo)
 		return nil
