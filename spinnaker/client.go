@@ -36,6 +36,7 @@ type Client interface {
 	PollTaskStatus(refURL string, timeout time.Duration) (*ExecutionResponse, error)
 	GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfig, error)
 	SavePipelineConfig(pipelineConfig PipelineConfig) error
+	DeletePipeline(app string, pipelineID string) error
 }
 
 type client struct {
@@ -66,6 +67,10 @@ func (c *client) pipelineConfigURL(app, pipelineConfigID string) string {
 
 func (c *client) pipelinesURL() string {
 	return c.endpoint + "/pipelines"
+}
+
+func (c *client) pipelineURL(app string, pipelineID string) string {
+	return fmt.Sprintf( "%s/pipelines/%s/%s", c.endpoint, app, pipelineID)
 }
 
 func (c *client) templateExists(id string) (bool, error) {
@@ -271,6 +276,24 @@ func (c *client) SavePipelineConfig(pipelineConfig PipelineConfig) error {
 		fmt.Println(resp.StatusCode)
 		fmt.Println(string(respBody))
 		return errors.New("plan request failed")
+	}
+
+	return nil
+}
+
+func (c *client) DeletePipeline(app string, pipelineID string) error {
+	url := c.pipelineURL(app, pipelineID)
+	logrus.WithField("pipelineConfigID", pipelineID).Debug("deleting pipeline")
+
+	resp, respBody, err := c.delete(url)
+	if err != nil {
+		return errors.Wrap(err, "delete pipeline config")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println(resp.StatusCode)
+		fmt.Println(string(respBody))
+		return errors.New("delete request failed")
 	}
 
 	return nil
