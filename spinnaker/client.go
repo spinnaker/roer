@@ -29,6 +29,8 @@ type ClientConfig struct {
 // TODO rz - this interface is pretty bad
 type Client interface {
 	PublishTemplate(template map[string]interface{}, skipPlan bool) (*TaskRefResponse, error)
+	ApplicationSubmitTask(app string, task Task) (*TaskRefResponse, error)
+	ApplicationGet(app string) (bool, []byte, error)
 	Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error)
 	DeleteTemplate(templateID string) (*TaskRefResponse, error)
 	// Run(configuration interface{}) ([]byte, error)
@@ -66,6 +68,14 @@ func (c *client) pipelineConfigURL(app, pipelineConfigID string) string {
 
 func (c *client) pipelinesURL() string {
 	return c.endpoint + "/pipelines"
+}
+
+func (c *client) applicationTasksURL(app string) string {
+	return c.endpoint + fmt.Sprintf("/applications/%s/tasks", app)
+}
+
+func (c *client) applicationURL(app string) string {
+	return c.endpoint + fmt.Sprintf("/applications/%s", app)
 }
 
 func (c *client) templateExists(id string) (bool, error) {
@@ -115,6 +125,45 @@ func (c *client) PublishTemplate(template map[string]interface{}, skipPlan bool)
 	}
 
 	return &ref, nil
+}
+
+func (c *client) ApplicationSubmitTask(app string, task Task) (*TaskRefResponse, error) {
+	url := c.applicationTasksURL(app)
+	resp, respBody, err := c.postJSON(url, task)
+	if err != nil {
+		return nil, errors.Wrap(err, "create application submit task")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println(resp.StatusCode)
+		fmt.Println(string(respBody))
+		return nil, errors.New("submit task failed")
+	}
+
+	var ref TaskRefResponse
+	if err := json.Unmarshal(respBody, &ref); err != nil {
+		fmt.Println(string(respBody))
+		return nil, errors.New("unmarshaling task create response")
+	}
+
+	return &ref, nil
+}
+
+func (c *client) ApplicationGet(app string) (bool, []byte, error) {
+	url := c.applicationURL(app)
+	resp, respBody, err := c.getJSON(url)
+	if err != nil {
+		return false, nil, errors.Wrap(err, "unable to get application info")
+	}
+
+	if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusForbidden {
+		return false, nil, nil
+	}
+	if resp.StatusCode != http.StatusOK {
+		return false, nil, errors.New("Unable to determine state of application " + app + ", status: " + strconv.Itoa(resp.StatusCode))
+	}
+
+	return true, respBody, nil
 }
 
 func (c *client) Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error) {

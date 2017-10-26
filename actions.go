@@ -62,6 +62,80 @@ func PipelineSaveAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
+func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		appName := cc.Args().Get(0)
+		ownerEmail := cc.Args().Get(1)
+		logrus.WithField("appName", appName).Debug("Filling in create application task")
+
+		createAppJob := spinnaker.CreateApplicationJob{
+			Application: spinnaker.ApplicationAttributes{
+				Email: ownerEmail,
+				Name:  appName,
+			},
+			Type: "createApplication",
+		}
+		createApp := spinnaker.Task{
+			Application: appName,
+			Description: "Create Application: " + appName,
+			Job:         []interface{}{createAppJob},
+		}
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		logrus.Info("Sending create app task")
+		ref, err := client.ApplicationSubmitTask(appName, createApp)
+		if err != nil {
+			return errors.Wrapf(err, "submitting task")
+		}
+
+		resp, err := client.PollTaskStatus(ref.Ref, 1*time.Minute)
+		if err != nil {
+			return errors.Wrap(err, "poll create app status")
+		}
+
+		if resp.Status == "TERMINAL" {
+			logrus.WithField("status", resp.Status).Error("Task failed")
+			if retrofitErr := resp.ExtractRetrofitError(); retrofitErr != nil {
+				prettyPrintJSON([]byte(retrofitErr.ResponseBody))
+			} else {
+				fmt.Printf("%#v\n", resp)
+			}
+		} else {
+			logrus.WithField("status", resp.Status).Info("Task completed")
+		}
+
+		return nil
+	}
+}
+
+func AppGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		appName := cc.Args().Get(0)
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		logrus.WithField("appName", appName).Info("Fetching application")
+		exists, appInfo, err := client.ApplicationGet(appName)
+		if err != nil {
+			return errors.Wrap(err, "Fetching app info")
+		}
+
+		if exists == false {
+			fmt.Println("App does not exist or insufficient permission")
+			return errors.New("Could not fetch app info")
+		}
+		prettyPrintJSON(appInfo)
+		return nil
+	}
+}
+
 // PipelineTemplatePublishAction creates the ActionFunc for publishing pipeline
 // templates.
 func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
