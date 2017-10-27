@@ -308,7 +308,6 @@ func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.Actio
 
 func PipelineDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
-		fmt.Println("woo")
 		app := cc.Args().Get(0)
 		pipelineID := cc.Args().Get(1)
 
