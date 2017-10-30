@@ -136,6 +136,27 @@ func AppGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
+func AppListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		logrus.Info("Fetching application list")
+
+		appInfo, err := client.ApplicationList()
+		if err != nil {
+			return errors.Wrap(err, "Fetching application list")
+		}
+
+		for _, app := range appInfo {
+			fmt.Println(app.Name)
+		}
+		return nil
+	}
+}
+
 // PipelineTemplatePublishAction creates the ActionFunc for publishing pipeline
 // templates.
 func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {

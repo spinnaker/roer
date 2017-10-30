@@ -31,6 +31,7 @@ type Client interface {
 	PublishTemplate(template map[string]interface{}, skipPlan bool) (*TaskRefResponse, error)
 	ApplicationSubmitTask(app string, task Task) (*TaskRefResponse, error)
 	ApplicationGet(app string) (bool, []byte, error)
+	ApplicationList() ([]ApplicationInfo, error)
 	Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error)
 	DeleteTemplate(templateID string) (*TaskRefResponse, error)
 	// Run(configuration interface{}) ([]byte, error)
@@ -76,6 +77,10 @@ func (c *client) applicationTasksURL(app string) string {
 
 func (c *client) applicationURL(app string) string {
 	return c.endpoint + fmt.Sprintf("/applications/%s", app)
+}
+
+func (c *client) applicationsURL() string {
+	return c.endpoint + "/applications"
 }
 
 func (c *client) templateExists(id string) (bool, error) {
@@ -164,6 +169,26 @@ func (c *client) ApplicationGet(app string) (bool, []byte, error) {
 	}
 
 	return true, respBody, nil
+}
+
+func (c *client) ApplicationList() ([]ApplicationInfo, error) {
+	url := c.applicationsURL()
+	resp, respBody, err := c.getJSON(url)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to get application list")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Unable to fetch application list: " + strconv.Itoa(resp.StatusCode))
+	}
+
+	var appInfo []ApplicationInfo
+	if err := json.Unmarshal(respBody, &appInfo); err != nil {
+		fmt.Println(string(respBody))
+		return nil, errors.New("unmarshaling application list")
+	}
+
+	return appInfo, nil
 }
 
 func (c *client) Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error) {

@@ -133,6 +133,10 @@ type PipelineConfig struct {
 	Config               interface{}              `json:"config,omitempty"`
 }
 
+type ApplicationInfo struct {
+	Name string `json:"name"`
+}
+
 type PipelineLock struct {
 	AllowUnlockUI bool   `json:"allowUnlockUi"`
 	Description   string `json:"description"`

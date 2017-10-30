@@ -67,6 +67,11 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					},
 					Action: roer.AppGetAction(clientConfig),
 				},
+				{
+					Name:   "list",
+					Usage:  "list applications",
+					Action: roer.AppListAction(clientConfig),
+				},
 			},
 		},
 		{
