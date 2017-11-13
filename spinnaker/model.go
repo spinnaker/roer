@@ -33,6 +33,22 @@ type TemplatedPipelineError struct {
 	NestedErrors []TemplatedPipelineError `json:"nestedErrors"`
 }
 
+type Task struct {
+	Application string        `json:"application"`
+	Description string        `json:"description"`
+	Job         []interface{} `json:"job,omitempty""`
+}
+
+type CreateApplicationJob struct {
+	Application ApplicationAttributes `json:"application"`
+	Type        string                `json:"type"`
+}
+
+type ApplicationAttributes struct {
+	Email string `json:"email"`
+	Name  string `json:"name"`
+}
+
 // TaskRefResponse represents a task ID URL response following a submitted
 // orchestration.
 type TaskRefResponse struct {
@@ -115,6 +131,10 @@ type PipelineConfig struct {
 	Notifications        []map[string]interface{} `json:"notifications,omitempty"`
 	LastModifiedBy       string                   `json:"lastModifiedBy"`
 	Config               interface{}              `json:"config,omitempty"`
+}
+
+type ApplicationInfo struct {
+	Name string `json:"name"`
 }
 
 type PipelineLock struct {

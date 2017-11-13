@@ -40,6 +40,41 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 			},
 		},
 		{
+			Name:  "app",
+			Usage: "application tasks",
+			Subcommands: []cli.Command{
+				{
+					Name:      "create",
+					Usage:     "create or update an application",
+					ArgsUsage: "[app name] [owner email]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 2 {
+							return errors.New("both application name and owner email are required")
+						}
+						return nil
+					},
+					Action: roer.AppCreateAction(clientConfig),
+				},
+				{
+					Name:      "get",
+					Usage:     "get info about an application",
+					ArgsUsage: "[app name]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 1 {
+							return errors.New("application name is required")
+						}
+						return nil
+					},
+					Action: roer.AppGetAction(clientConfig),
+				},
+				{
+					Name:   "list",
+					Usage:  "list applications",
+					Action: roer.AppListAction(clientConfig),
+				},
+			},
+		},
+		{
 			Name:  "pipeline-template",
 			Usage: "pipeline template tasks",
 			Subcommands: []cli.Command{
