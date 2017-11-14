@@ -306,6 +306,26 @@ func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.Actio
 	}
 }
 
+func PipelineDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		app := cc.Args().Get(0)
+		pipelineID := cc.Args().Get(1)
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrap(err, "creating spinnaker client")
+		}
+
+		logrus.Info("Deleting pipeline")
+		err = client.DeletePipeline(app, pipelineID)
+		if err != nil {
+			return errors.Wrap(err, "deleting pipeline template")
+		}
+
+		return nil
+	}
+}
+
 func clientFromContext(cc *cli.Context, config spinnaker.ClientConfig) (spinnaker.Client, error) {
 	hc, err := config.HTTPClientFactory(cc)
 	if err != nil {
