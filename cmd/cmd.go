@@ -103,6 +103,14 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 							Name:  "skipPlan, s",
 							Usage: "skip the plan dependent pipelines safety feature",
 						},
+						cli.StringFlag{
+							Name:  "templateId, t",
+							Usage: "override the template ID",
+						},
+						cli.StringFlag{
+							Name:  "source",
+							Usage: "override or add the source template",
+						},
 					},
 					Before: func(cc *cli.Context) error {
 						if cc.NArg() != 1 {

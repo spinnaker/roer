@@ -28,7 +28,7 @@ type ClientConfig struct {
 // Client is the Spinnaker API client
 // TODO rz - this interface is pretty bad
 type Client interface {
-	PublishTemplate(template map[string]interface{}, skipPlan bool) (*TaskRefResponse, error)
+	PublishTemplate(template map[string]interface{}, options PublishTemplateOptions) (*TaskRefResponse, error)
 	ApplicationSubmitTask(app string, task Task) (*TaskRefResponse, error)
 	ApplicationGet(app string) (bool, []byte, error)
 	ApplicationList() ([]ApplicationInfo, error)
@@ -107,8 +107,22 @@ func (c *client) templateExists(id string) (bool, error) {
 	return false, errors.New("Unable to determine state of the pipeline template " + id + ", status: " + strconv.Itoa(resp.StatusCode))
 }
 
-func (c *client) PublishTemplate(template map[string]interface{}, skipPlan bool) (*TaskRefResponse, error) {
+type PublishTemplateOptions struct {
+	SkipPlan   bool
+	TemplateID string
+	Source     string
+}
+
+func (c *client) PublishTemplate(template map[string]interface{}, options PublishTemplateOptions) (*TaskRefResponse, error) {
 	url := c.pipelineTemplatesURL()
+	if options.TemplateID != "" {
+		// add the ability to override the template ID when publishing
+		template["id"] = options.TemplateID
+	}
+	if options.Source != "" {
+		// add the ability to override the source template when publishing
+		template["source"] = options.Source
+	}
 	id := template["id"].(string)
 	exists, err := c.templateExists(id)
 	if err != nil {
@@ -117,10 +131,9 @@ func (c *client) PublishTemplate(template map[string]interface{}, skipPlan bool)
 	if exists {
 		url = url + "/" + id
 	}
-	if skipPlan {
+	if options.SkipPlan {
 		url = url + "?skipPlanDependents=true"
 	}
-
 	resp, respBody, err := c.postJSON(url, template)
 	if err != nil {
 		return nil, errors.Wrap(err, "pipeline template publish")

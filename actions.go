@@ -178,7 +178,11 @@ func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.Acti
 		}
 
 		logrus.Info("Publishing template")
-		ref, err := client.PublishTemplate(template, cc.Bool("skipPlan"))
+		ref, err := client.PublishTemplate(template, spinnaker.PublishTemplateOptions{
+			SkipPlan:   cc.Bool("skipPlan"),
+			TemplateID: cc.String("templateId"),
+			Source:     cc.String("source"),
+		})
 		if err != nil {
 			return errors.Wrap(err, "publishing template")
 		}
