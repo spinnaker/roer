@@ -88,10 +88,6 @@ func (c *client) pipelineURL(app string, pipelineID string) string {
 	return fmt.Sprintf("%s/pipelines/%s/%s", c.endpoint, app, pipelineID)
 }
 
-func (c *client) pipelineURL(app string, pipelineID string) string {
-	return fmt.Sprintf("%s/pipelines/%s/%s", c.endpoint, app, pipelineID)
-}
-
 func (c *client) templateExists(id string) (bool, error) {
 	url := c.pipelineTemplatesURL() + "/" + id
 	resp, _, err := c.getJSON(url)
