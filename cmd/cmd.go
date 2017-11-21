@@ -120,18 +120,6 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					Usage:  "list applications",
 					Action: roer.AppListAction(clientConfig),
 				},
-				{
-					Name:      "delete",
-					Usage:     "removes a pipeline",
-					ArgsUsage: "[application name] [pipeline name]",
-					Before: func(cc *cli.Context) error {
-						if cc.NArg() != 2 {
-							return errors.New("both app name and pipeline name are required")
-						}
-						return nil
-					},
-					Action: roer.PipelineDeleteAction(clientConfig),
-				},
 			},
 		},
 		{
