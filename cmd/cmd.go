@@ -49,6 +49,30 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					},
 					Action: roer.PipelineSaveJsonAction(clientConfig),
                 },
+				{
+					Name:      "list",
+					Usage:     "list all the pipelines in an application",
+					ArgsUsage: "[application name]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 1 {
+							return errors.New("name of application is required")
+						}
+						return nil
+					},
+					Action: roer.PipelineListAction(clientConfig),
+				},
+				{
+					Name:      "get",
+					Usage:     "get the config for an individual pipeline",
+					ArgsUsage: "[application name] [pipeline name]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 2 {
+							return errors.New("both app name and pipeline name are required")
+						}
+						return nil
+					},
+					Action: roer.PipelineGetAction(clientConfig),
+				},
                 {
 					Name:      "delete",
 					Usage:     "delete a pipeline",
@@ -97,18 +121,6 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					Action: roer.AppListAction(clientConfig),
 				},
 				{
-					Name:      "pipelines",
-					Usage:     "list all the pipelines in an application",
-					ArgsUsage: "[application name]",
-					Before: func(cc *cli.Context) error {
-						if cc.NArg() != 1 {
-							return errors.New("name of application is required")
-						}
-						return nil
-					},
-					Action: roer.PipelineListAction(clientConfig),
-				},
-				{
 					Name:      "delete",
 					Usage:     "removes a pipeline",
 					ArgsUsage: "[application name] [pipeline name]",
@@ -119,18 +131,6 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 						return nil
 					},
 					Action: roer.PipelineDeleteAction(clientConfig),
-				},
-				{
-					Name:      "get",
-					Usage:     "get the config for an individual pipeline",
-					ArgsUsage: "[application name] [pipeline name]",
-					Before: func(cc *cli.Context) error {
-						if cc.NArg() != 2 {
-							return errors.New("both app name and pipeline name are required")
-						}
-						return nil
-					},
-					Action: roer.PipelineGetAction(clientConfig),
 				},
 			},
 		},
