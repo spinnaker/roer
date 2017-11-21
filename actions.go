@@ -240,25 +240,6 @@ func PipelineGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
-func PipelineDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
-	return func(cc *cli.Context) error {
-		appName := cc.Args().Get(0)
-		pipelineName := cc.Args().Get(1)
-		logrus.WithField("app", appName).WithField("pipelineName", pipelineName).Debug("Deleting pipeline")
-
-		client, err := clientFromContext(cc, clientConfig)
-		if err != nil {
-			return errors.Wrapf(err, "creating spinnaker client")
-		}
-
-		err = client.DeletePipeline(appName, pipelineName)
-		if err != nil {
-			return errors.Wrap(err, "Deleting pipeline")
-		}
-		return nil
-	}
-}
-
 // PipelineTemplatePublishAction creates the ActionFunc for publishing pipeline
 // templates.
 func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
