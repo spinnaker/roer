@@ -73,7 +73,6 @@ func (c *client) pipelinesURL() string {
 	return c.endpoint + "/pipelines"
 }
 
-
 func (c *client) applicationTasksURL(app string) string {
 	return c.endpoint + fmt.Sprintf("/applications/%s/tasks", app)
 }
