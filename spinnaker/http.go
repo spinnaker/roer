@@ -48,14 +48,32 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 		}
 	}
 
-	if cc.GlobalIsSet("certPath") && cc.GlobalIsSet("keyPath") {
+	var certPath string
+	var keyPath string
+
+	if cc.GlobalIsSet("certPath") {
+		certPath = cc.GlobalString("certPath")
+	} else if os.Getenv("SPINNAKER_CLIENT_CERT") != "" {
+		certPath = os.Getenv("SPINNAKER_CLIENT_CERT")
+	} else {
+		certPath = ""
+	}
+	if cc.GlobalIsSet("keyPath") {
+		keyPath = cc.GlobalString("keyPath")
+	} else if os.Getenv("SPINNAKER_CLIENT_KEY") != "" {
+		keyPath = os.Getenv("SPINNAKER_CLIENT_KEY")
+	} else {
+		keyPath = ""
+	}
+
+	if certPath != "" && keyPath != "" {
 		logrus.Debug("Configuring TLS with pem cert/key pair")
-		cert, err := tls.LoadX509KeyPair(cc.GlobalString("certPath"), cc.GlobalString("keyPath"))
+		cert, err := tls.LoadX509KeyPair(certPath, keyPath)
 		if err != nil {
 			return nil, errors.Wrap(err, "loading x509 keypair")
 		}
 
-		clientCA, err := ioutil.ReadFile(cc.GlobalString("certPath"))
+		clientCA, err := ioutil.ReadFile(certPath)
 		if err != nil {
 			return nil, errors.Wrap(err, "loading client CA")
 		}
