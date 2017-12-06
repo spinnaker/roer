@@ -38,6 +38,42 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					Action: roer.PipelineSaveAction(clientConfig),
 				},
 				{
+					Name:      "savejson",
+					Usage:     "save a json pipeline configuration",
+					ArgsUsage: "[configuration.json]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 1 {
+							return errors.New("path to json file is required")
+						}
+						return nil
+					},
+					Action: roer.PipelineSaveJsonAction(clientConfig),
+                },
+				{
+					Name:      "list",
+					Usage:     "list all the pipelines in an application",
+					ArgsUsage: "[application name]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 1 {
+							return errors.New("name of application is required")
+						}
+						return nil
+					},
+					Action: roer.PipelineListConfigsAction(clientConfig),
+				},
+				{
+					Name:      "get",
+					Usage:     "get the config for an individual pipeline",
+					ArgsUsage: "[application name] [pipeline name]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 2 {
+							return errors.New("both app name and pipeline name are required")
+						}
+						return nil
+					},
+					Action: roer.PipelineGetConfigAction(clientConfig),
+				},
+                {
 					Name:      "delete",
 					Usage:     "delete a pipeline",
 					ArgsUsage: "[application] [pipelineName]",

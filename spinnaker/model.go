@@ -131,6 +131,7 @@ type PipelineConfig struct {
 	Notifications        []map[string]interface{} `json:"notifications,omitempty"`
 	LastModifiedBy       string                   `json:"lastModifiedBy"`
 	Config               interface{}              `json:"config,omitempty"`
+	UpdateTs             string                   `json:"updateTs"`
 }
 
 type ApplicationInfo struct {

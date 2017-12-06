@@ -39,7 +39,8 @@ type Client interface {
 	PollTaskStatus(refURL string, timeout time.Duration) (*ExecutionResponse, error)
 	GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfig, error)
 	SavePipelineConfig(pipelineConfig PipelineConfig) error
-	DeletePipeline(app string, pipelineID string) error
+	ListPipelineConfigs(app string) ([]PipelineConfig, error)
+	DeletePipeline(app, pipelineConfigID string) error
 }
 
 type client struct {
@@ -349,6 +350,26 @@ func (c *client) GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfi
 	}
 
 	return &config, nil
+}
+
+func (c *client) ListPipelineConfigs(app string) ([]PipelineConfig, error) {
+	url := c.pipelineConfigsURL(app)
+	resp, respBody, err := c.getJSON(url)
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to get pipeline list")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Unable to fetch pipeline list: " + strconv.Itoa(resp.StatusCode))
+	}
+
+	var pipelineInfo []PipelineConfig
+	if err := json.Unmarshal(respBody, &pipelineInfo); err != nil {
+		fmt.Println(string(respBody))
+		return nil, errors.New("unmarshaling pipeline list")
+	}
+
+	return pipelineInfo, nil
 }
 
 func (c *client) SavePipelineConfig(pipelineConfig PipelineConfig) error {
