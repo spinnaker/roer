@@ -59,7 +59,7 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 						}
 						return nil
 					},
-					Action: roer.PipelineListAction(clientConfig),
+					Action: roer.PipelineListConfigsAction(clientConfig),
 				},
 				{
 					Name:      "get",
@@ -71,7 +71,7 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 						}
 						return nil
 					},
-					Action: roer.PipelineGetAction(clientConfig),
+					Action: roer.PipelineGetConfigAction(clientConfig),
 				},
                 {
 					Name:      "delete",

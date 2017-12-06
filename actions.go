@@ -196,7 +196,7 @@ func PipelineSaveJsonAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc 
 	}
 }
 
-func PipelineListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+func PipelineListConfigsAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
 		logrus.WithField("app", appName).Debug("Fetching pipelines")
@@ -206,7 +206,7 @@ func PipelineListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 			return errors.Wrapf(err, "creating spinnaker client")
 		}
 
-		pipelineInfo, err := client.ListPipeline(appName)
+		pipelineInfo, err := client.ListPipelineConfigs(appName)
 		if err != nil {
 			return errors.Wrap(err, "Fetching pipelines")
 		}
@@ -218,7 +218,7 @@ func PipelineListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
-func PipelineGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+func PipelineGetConfigAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
 		pipelineName := cc.Args().Get(1)

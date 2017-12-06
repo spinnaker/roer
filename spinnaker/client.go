@@ -39,7 +39,7 @@ type Client interface {
 	PollTaskStatus(refURL string, timeout time.Duration) (*ExecutionResponse, error)
 	GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfig, error)
 	SavePipelineConfig(pipelineConfig PipelineConfig) error
-	ListPipeline(app string) ([]PipelineConfig, error)
+	ListPipelineConfigs(app string) ([]PipelineConfig, error)
 	DeletePipeline(app, pipelineConfigID string) error
 }
 
@@ -352,7 +352,7 @@ func (c *client) GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfi
 	return &config, nil
 }
 
-func (c *client) ListPipeline(app string) ([]PipelineConfig, error) {
+func (c *client) ListPipelineConfigs(app string) ([]PipelineConfig, error) {
 	url := c.pipelineConfigsURL(app)
 	resp, respBody, err := c.getJSON(url)
 	if err != nil {
