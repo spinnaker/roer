@@ -22,6 +22,7 @@ type PipelineTemplateMetadata struct {
 type PipelineTemplateConfig struct {
 	ConcurrentExecutions map[string]bool          `json:"concurrentExecutions,omitempty"`
 	Triggers             []map[string]interface{} `json:"triggers,omitempty"`
+	ExpectedArtifacts    []map[string]interface{} `json:"expectedArtifacts,omitempty"`
 	Parameters           []map[string]interface{} `json:"parameters,omitempty"`
 	Notifications        []map[string]interface{} `json:"notifications,omitempty"`
 }
@@ -113,6 +114,7 @@ type PipelineConfig struct {
 	Inherit              []string        `json:"inherit"`
 	ConcurrentExecutions map[string]bool `json:"concurrentExecutions"`
 	Triggers             []interface{}   `json:"triggers"`
+	ExpectedArtifacts    []interface{}   `json:"expectedArtifacts"`
 	Parameters           []interface{}   `json:"parameters"`
 	Notifications        []interface{}   `json:"notifications"`
 	Description          string          `json:"description"`
