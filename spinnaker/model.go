@@ -127,6 +127,7 @@ type PipelineConfig struct {
 	KeepWaitingPipelines bool                     `json:"keepWaitingPipelines"`
 	Stages               []map[string]interface{} `json:"stages,omitempty"`
 	Triggers             []map[string]interface{} `json:"triggers,omitempty"`
+	ExpectedArtifacts    []map[string]interface{} `json:"expectedArtifacts,omitempty"`
 	Parameters           []map[string]interface{} `json:"parameterConfig,omitempty"`
 	Notifications        []map[string]interface{} `json:"notifications,omitempty"`
 	LastModifiedBy       string                   `json:"lastModifiedBy"`
