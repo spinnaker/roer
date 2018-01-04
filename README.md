@@ -55,6 +55,15 @@ COMMANDS:
      convert  converts an existing, non-templated pipeline config into a scaffolded template
 ```
 
+Publish template for use:
+
+```json
+$ SPINNAKER_API=https://localhost:7002 \
+  go run cmd/roer/main.go pipeline-template publish examples/wait-template.yml
+```
+
+Plan a pipeline run using the template (invalid config example):
+
 ```json
 $ SPINNAKER_API=https://localhost:7002 \
   go run cmd/roer/main.go pipeline-template plan examples/wait-config-invalid.yml
@@ -75,6 +84,47 @@ $ SPINNAKER_API=https://localhost:7002 \
   "status": "BAD_REQUEST"
 }
 ```
+
+Plan a pipeline run using the template (valid config example):
+
+```json
+$ SPINNAKER_API=https://localhost:7002 \
+  go run cmd/roer/main.go pipeline-template plan examples/wait-config.yml
+{
+  "application": "spintest",
+  "id": "unknown",
+  "keepWaitingPipelines": false,
+  "limitConcurrent": true,
+  "name": "mpt",
+  "notifications": [],
+  "parameterConfig": [],
+  "stages": [
+    {
+      "id": "947eb68b-1b03-4f33-b7c2-b3fa38eeef94",
+      "name": "wait",
+      "refId": "wait",
+      "requisiteStageRefIds": [],
+      "type": "wait",
+      "waitTime": 5
+    }
+  ],
+  "trigger": {
+    "parameters": {},
+    "type": "manual",
+    "user": "anonymous"
+  }
+}
+```
+
+## pipeline
+
+Create or update a managed pipeline within an applicaiton:
+
+```json
+$ SPINNAKER_API=https://localhost:7002 \
+  go run cmd/roer/main.go pipeline save examples/wait-config.yml
+```
+
 
 # Development
 
