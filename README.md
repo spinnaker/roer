@@ -11,6 +11,10 @@ You can download the most recent version from the [Releases][releases] tab.
 
 # Usage
 
+Make sure your Spinnaker installation has pipeline-templates enabled:
+
+`hal config features edit --pipeline-templates true`
+
 Export `SPINNAKER_API` pointing to your Gate API.
 
 ```
