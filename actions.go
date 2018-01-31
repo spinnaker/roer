@@ -45,7 +45,7 @@ func PipelineSaveAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 
 		existingConfig, err := client.GetPipelineConfig(config.Pipeline.Application, config.Pipeline.Name)
 		if err != nil {
-			return errors.Wrap(err, "seaching for existing pipeline config")
+			return errors.Wrap(err, "searching for existing pipeline config")
 		}
 
 		// TODO rz - orca should probably auto-set the pipeline config id somehow so
