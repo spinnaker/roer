@@ -7,14 +7,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spinnaker/roer"
 	"github.com/spinnaker/roer/spinnaker"
-	"github.com/urfave/cli"
+	"gopkg.in/urfave/cli.v1"
 )
 
 // NewRoer returns a new instance of the OSS roer application
 func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
-	cli.VersionFlag.Name = "version"
-	cli.HelpFlag.Name = "help"
-	cli.HelpFlag.Hidden = true
+	cli.VersionFlag = cli.BoolFlag{Name: "version"}
+	cli.HelpFlag = cli.BoolFlag{Name: "help", Usage: "Show Help", Hidden: true}
 
 	app := cli.NewApp()
 	app.Name = "roer"
