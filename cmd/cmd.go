@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"github.com/spinnaker/roer"
 	"github.com/spinnaker/roer/spinnaker"
 	"github.com/urfave/cli"
@@ -48,7 +48,7 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 						return nil
 					},
 					Action: roer.PipelineSaveJsonAction(clientConfig),
-                },
+				},
 				{
 					Name:      "list",
 					Usage:     "list all the pipelines in an application",
@@ -73,7 +73,7 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					},
 					Action: roer.PipelineGetConfigAction(clientConfig),
 				},
-                {
+				{
 					Name:      "delete",
 					Usage:     "delete a pipeline",
 					ArgsUsage: "[application] [pipelineName]",

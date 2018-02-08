@@ -6,10 +6,10 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/ghodss/yaml"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"github.com/spinnaker/roer/spinnaker"
 	"github.com/urfave/cli"
 )
