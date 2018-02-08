@@ -12,9 +12,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
-	"github.com/urfave/cli"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/urfave/cli.v1"
 )
 
 // HTTPClientFactory creates a new http.Client from the cli.Context

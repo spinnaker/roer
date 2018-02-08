@@ -1,8 +1,8 @@
 package spinnaker
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/mitchellh/mapstructure"
+	"github.com/sirupsen/logrus"
 )
 
 // M allows certain responses to contain untyped data (most Spinnaker interfaces)
