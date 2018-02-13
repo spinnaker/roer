@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	"strconv"
@@ -41,6 +42,7 @@ type Client interface {
 	SavePipelineConfig(pipelineConfig PipelineConfig) error
 	ListPipelineConfigs(app string) ([]PipelineConfig, error)
 	DeletePipeline(app, pipelineConfigID string) error
+	FiatLogin(fiatUser string, fiatPass string) error
 }
 
 type client struct {
@@ -87,6 +89,10 @@ func (c *client) applicationsURL() string {
 
 func (c *client) pipelineURL(app string, pipelineID string) string {
 	return fmt.Sprintf("%s/pipelines/%s/%s", c.endpoint, app, pipelineID)
+}
+
+func (c *client) fiatLoginURL() string {
+    return c.endpoint + "/login"
 }
 
 func (c *client) templateExists(id string) (bool, error) {
@@ -405,4 +411,17 @@ func (c *client) DeletePipeline(app string, pipelineID string) error {
 	}
 
 	return nil
+}
+
+func (c *client) FiatLogin(fiatUser string, fiatPass string) error {
+    postURL := c.fiatLoginURL()
+    
+    data := url.Values{"username": {fiatUser}, "password": {fiatPass}, "submit": {"Login"}}
+    
+    _, _, err := c.postForm(postUrl, data)
+    if err != nil {
+        return errors.Wrap(err, "fiat login")
+    }
+    
+    return nil
 }
