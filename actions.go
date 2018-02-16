@@ -418,7 +418,18 @@ func clientFromContext(cc *cli.Context, config spinnaker.ClientConfig) (spinnake
 	if err != nil {
 		return nil, errors.Wrap(err, "creating http client from context")
 	}
-	return spinnaker.New(config.Endpoint, hc), nil
+	
+	var sc spinnaker.Client
+	sc = spinnaker.New(config.Endpoint, hc)
+	
+	if cc.GlobalIsSet("fiatUser") && cc.GlobalIsSet("fiatPass") {
+	    err := sc.FiatLogin(cc.GlobalString("fiatUser"), cc.GlobalString("fiatPass"))
+	    if err != nil {
+	        return nil, errors.Wrap(err, "fiat auth login attempt")
+	    }
+	}
+	
+	return sc, nil
 }
 
 func readYamlFile(f string) (map[string]interface{}, error) {

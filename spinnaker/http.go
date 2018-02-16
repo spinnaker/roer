@@ -27,9 +27,9 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 		logrus.Panic("cli context has not been set")
 	}
 	var c http.Client
+    cookieJar, _ := cookiejar.New(nil)
 
 	if cc.GlobalIsSet("apiSession") {
-		cookieJar, _ := cookiejar.New(nil)
 		var cookies []*http.Cookie
 		cookie := &http.Cookie{
 			Name:  "SESSION",
@@ -38,15 +38,12 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 		cookies = append(cookies, cookie)
 		u, _ := url.Parse(os.Getenv("SPINNAKER_API"))
 		cookieJar.SetCookies(u, cookies)
-		c = http.Client{
-			Timeout: 10 * time.Second,
-			Jar:     cookieJar,
-		}
-	} else {
-		c = http.Client{
-			Timeout: 10 * time.Second,
-		}
 	}
+
+    c = http.Client{
+        Timeout: 10 * time.Second,
+        Jar:     cookieJar,
+    }
 
 	var certPath string
 	var keyPath string
@@ -121,6 +118,26 @@ func (c *client) postJSON(url string, body interface{}) (resp *http.Response, re
 	}
 
 	return resp, respBody, nil
+}
+
+func (c *client) postForm(url string, data url.Values) (resp *http.Response, respBody []byte, err error) {
+    resp, err = c.httpClient.PostForm(url, data)
+    if err != nil {
+        return nil, nil, errors.Wrapf(err, "posting to %s", url)
+    }
+
+    defer func() {
+        if cerr := resp.Body.Close(); cerr != nil && err != nil {
+            err = errors.Wrapf(err, "failed to close response body from %s", url)
+        }
+    }()
+
+    respBody, err = ioutil.ReadAll(resp.Body)
+    if err != nil {
+        return nil, nil, errors.Wrapf(err, "failed to read response body from url %s", url)
+    }
+
+    return resp, respBody, nil
 }
 
 func (c *client) getJSON(url string) (resp *http.Response, respBody []byte, err error) {

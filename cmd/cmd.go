@@ -243,6 +243,14 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 			Name:  "insecure",
 			Usage: "Bypass TLS certificate validation",
 		},
+		cli.StringFlag{
+			Name:  "fiatUser",
+			Usage: "Username for Fiat auth",
+		},
+		cli.StringFlag{
+			Name:  "fiatPass",
+			Usage: "Password for Fiat auth",
+		},
 	}
 	app.Before = func(cc *cli.Context) error {
 		if cc.GlobalBool("verbose") {
