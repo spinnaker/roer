@@ -418,7 +418,7 @@ func (c *client) FiatLogin(fiatUser string, fiatPass string) error {
     
     data := url.Values{"username": {fiatUser}, "password": {fiatPass}, "submit": {"Login"}}
     
-    _, _, err := c.postForm(postUrl, data)
+    _, _, err := c.postForm(postURL, data)
     if err != nil {
         return errors.Wrap(err, "fiat login")
     }
