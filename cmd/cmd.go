@@ -239,6 +239,10 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 			Name:  "apiSession, as",
 			Usage: "your active api session",
 		},
+		cli.BoolFlag{
+			Name:  "insecure",
+			Usage: "Bypass TLS certificate validation",
+		},
 		cli.StringFlag{
 			Name:  "fiatUser",
 			Usage: "Username for Fiat auth",

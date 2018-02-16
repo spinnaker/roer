@@ -63,6 +63,10 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 		keyPath = ""
 	}
 
+	c.Transport = &http.Transport{
+        TLSClientConfig: &tls.Config{},
+    }
+
 	if certPath != "" && keyPath != "" {
 		logrus.Debug("Configuring TLS with pem cert/key pair")
 		cert, err := tls.LoadX509KeyPair(certPath, keyPath)
@@ -78,22 +82,14 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 		clientCertPool := x509.NewCertPool()
 		clientCertPool.AppendCertsFromPEM(clientCA)
 
-		tlsConfig := &tls.Config{
-			MinVersion:               tls.VersionTLS12,
-			PreferServerCipherSuites: true,
-			Certificates:             []tls.Certificate{cert},
-			// TODO rz - Add support for self-signed certs; this doesn't work
-			// RootCAs:                  clientCertPool,
-			InsecureSkipVerify: true,
-		}
-
-		c.Transport = &http.Transport{
-			TLSClientConfig: tlsConfig,
-		}
+		c.Transport.(*http.Transport).TLSClientConfig.MinVersion = tls.VersionTLS12
+		c.Transport.(*http.Transport).TLSClientConfig.PreferServerCipherSuites = true
+		c.Transport.(*http.Transport).TLSClientConfig.Certificates = []tls.Certificate{cert}
+		c.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify = true
 	}
 
-	if c.Transport == nil {
-		logrus.Warn("HTTP client not configured with TLS transport")
+	if cc.GlobalIsSet("insecure") {
+	    c.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify = true
 	}
 
 	return &c, nil
