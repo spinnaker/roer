@@ -239,6 +239,10 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 			Name:  "apiSession, as",
 			Usage: "your active api session",
 		},
+		cli.BoolFlag{
+			Name:  "insecure",
+			Usage: "Bypass TLS certificate validation",
+		},
 	}
 	app.Before = func(cc *cli.Context) error {
 		if cc.GlobalBool("verbose") {
