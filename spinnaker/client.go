@@ -92,7 +92,7 @@ func (c *client) pipelineURL(app string, pipelineID string) string {
 }
 
 func (c *client) fiatLoginURL() string {
-    return c.endpoint + "/login"
+	return c.endpoint + "/login"
 }
 
 func (c *client) templateExists(id string) (bool, error) {
@@ -414,14 +414,14 @@ func (c *client) DeletePipeline(app string, pipelineID string) error {
 }
 
 func (c *client) FiatLogin(fiatUser string, fiatPass string) error {
-    postURL := c.fiatLoginURL()
-    
-    data := url.Values{"username": {fiatUser}, "password": {fiatPass}, "submit": {"Login"}}
-    
-    _, _, err := c.postForm(postUrl, data)
-    if err != nil {
-        return errors.Wrap(err, "fiat login")
-    }
-    
-    return nil
+	postURL := c.fiatLoginURL()
+
+	data := url.Values{"username": {fiatUser}, "password": {fiatPass}, "submit": {"Login"}}
+
+	_, _, err := c.postForm(postURL, data)
+	if err != nil {
+		return errors.Wrap(err, "fiat login")
+	}
+
+	return nil
 }
