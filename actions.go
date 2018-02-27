@@ -181,7 +181,7 @@ func PipelineSaveJsonAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc 
 
 		existingConfig, err := client.GetPipelineConfig(newConfig.Application, newConfig.Name)
 		if err != nil {
-			return errors.Wrap(err, "seaching for existing pipeline config")
+			return errors.Wrap(err, "searching for existing pipeline config")
 		}
 
 		if existingConfig != nil {
