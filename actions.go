@@ -93,7 +93,7 @@ func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 			return errors.Wrapf(err, "submitting task")
 		}
 
-		resp, err := client.PollTaskStatus(ref.Ref, cc.GlobalInt("timeout")*time.Second)
+		resp, err := client.PollTaskStatus(ref.Ref, time.Duration(cc.GlobalInt("timeout"))*time.Second)
 		if err != nil {
 			return errors.Wrap(err, "poll create app status")
 		}
@@ -270,7 +270,7 @@ func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.Acti
 			return errors.Wrap(err, "publishing template")
 		}
 
-		resp, err := client.PollTaskStatus(ref.Ref, cc.GlobalInt("timeout")*time.Minute)
+		resp, err := client.PollTaskStatus(ref.Ref, time.Duration(cc.GlobalInt("timeout"))*time.Minute)
 		if err != nil {
 			return errors.Wrap(err, "polling task status")
 		}
@@ -373,7 +373,7 @@ func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.Actio
 			return errors.Wrap(err, "deleting pipeline template")
 		}
 
-		resp, err := client.PollTaskStatus(ref.Ref, cc.GlobalInt("timeout")*time.Minute)
+		resp, err := client.PollTaskStatus(ref.Ref, time.Duration(cc.GlobalInt("timeout"))*time.Minute)
 		if err != nil {
 			return errors.Wrap(err, "polling task status")
 		}

@@ -229,7 +229,7 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 		},
 		cli.IntFlag{
 		    Name:  "timeout",
-		    Usage: "Override the default timeout (in seconds) for API requests.",
+		    Usage: "Timeout (in seconds) for API request status polling.",
 		    Value: 60,
 		},
 		cli.StringFlag{
