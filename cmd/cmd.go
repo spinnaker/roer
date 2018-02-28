@@ -227,6 +227,11 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 			Name:  "verbose, v",
 			Usage: "show debug messages",
 		},
+		cli.IntFlag{
+		    Name:  "timeout",
+		    Usage: "Override the default timeout (in seconds) for API requests.",
+		    Value: 60,
+		},
 		cli.StringFlag{
 			Name:  "certPath, c",
 			Usage: "HTTPS x509 cert path",
