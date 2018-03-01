@@ -103,7 +103,7 @@ func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 			if retrofitErr := resp.ExtractRetrofitError(); retrofitErr != nil {
 				prettyPrintJSON([]byte(retrofitErr.ResponseBody))
 			} else {
-				fmt.Printf("%#v\n", resp)
+				logrus.Debugf("Response data %#v", resp)
 			}
 		} else {
 			logrus.WithField("status", resp.Status).Info("Task completed")
@@ -129,7 +129,7 @@ func AppGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 		}
 
 		if exists == false {
-			fmt.Println("App does not exist or insufficient permission")
+			logrus.Error("App does not exist or insufficient permission")
 			return fmt.Errorf("Could not fetch app info")
 		}
 		prettyPrintJSON(appInfo)
@@ -152,14 +152,14 @@ func AppListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 		}
 
 		for _, app := range appInfo {
-			fmt.Println(app.Name)
+			logrus.Debug(app.Name)
 		}
 
 		return nil
 	}
 }
 
-// Save a pipeline from json source
+// PipelineSaveJsonAction Save a pipeline from json source
 func PipelineSaveJsonAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		jsonFile := cc.Args().Get(0)
@@ -212,7 +212,7 @@ func PipelineListConfigsAction(clientConfig spinnaker.ClientConfig) cli.ActionFu
 		}
 
 		for _, pipeline := range pipelineInfo {
-			fmt.Println(pipeline.Name)
+			logrus.Debug(pipeline.Name)
 		}
 		return nil
 	}
@@ -235,7 +235,7 @@ func PipelineGetConfigAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc
 		}
 
 		jsonStr, _ := json.Marshal(pipelineConfig)
-		fmt.Println(string(jsonStr))
+		logrus.Debug(string(jsonStr))
 		return nil
 	}
 }
@@ -280,7 +280,7 @@ func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.Acti
 			if retrofitErr := resp.ExtractRetrofitError(); retrofitErr != nil {
 				prettyPrintJSON([]byte(retrofitErr.ResponseBody))
 			} else {
-				fmt.Printf("%#v\n", resp)
+				logrus.Debugf("Response data %#v", resp)
 			}
 		} else {
 			logrus.WithField("status", resp.Status).Info("Task completed")
@@ -316,7 +316,7 @@ func PipelineTemplatePlanAction(clientConfig spinnaker.ClientConfig) cli.ActionF
 				prettyPrintJSON(resp)
 				return nil
 			}
-			fmt.Println(string(resp))
+			logrus.Debug(string(resp))
 			return errors.Wrap(err, "planning configuration")
 		}
 
@@ -337,7 +337,7 @@ func PipelineTemplateConvertAction(clientConfig spinnaker.ClientConfig) cli.Acti
 
 		resp, err := client.GetPipelineConfig(app, pipelineConfigID)
 		if err != nil {
-			fmt.Println(resp)
+			logrus.Debug(resp)
 			return errors.Wrap(err, "getting pipeline config")
 		}
 
@@ -351,8 +351,8 @@ func PipelineTemplateConvertAction(clientConfig spinnaker.ClientConfig) cli.Acti
 			return errors.Wrap(err, "marshaling template to YAML")
 		}
 
-		fmt.Println(generatedTemplateHeader)
-		fmt.Println(string(template))
+		logrus.Debug(generatedTemplateHeader)
+		logrus.Debug(string(template))
 
 		return nil
 	}
@@ -383,7 +383,7 @@ func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.Actio
 			if retrofitErr := resp.ExtractRetrofitError(); retrofitErr != nil {
 				prettyPrintJSON([]byte(retrofitErr.ResponseBody))
 			} else {
-				fmt.Printf("%#v\n", resp)
+				logrus.Debugf("Response data %#v", resp)
 			}
 		} else {
 			logrus.WithField("status", resp.Status).Info("Task completed")
@@ -418,17 +418,17 @@ func clientFromContext(cc *cli.Context, config spinnaker.ClientConfig) (spinnake
 	if err != nil {
 		return nil, errors.Wrap(err, "creating http client from context")
 	}
-	
+
 	var sc spinnaker.Client
 	sc = spinnaker.New(config.Endpoint, hc)
-	
+
 	if cc.GlobalIsSet("fiatUser") && cc.GlobalIsSet("fiatPass") {
-	    err := sc.FiatLogin(cc.GlobalString("fiatUser"), cc.GlobalString("fiatPass"))
-	    if err != nil {
-	        return nil, errors.Wrap(err, "fiat auth login attempt")
-	    }
+		err := sc.FiatLogin(cc.GlobalString("fiatUser"), cc.GlobalString("fiatPass"))
+		if err != nil {
+			return nil, errors.Wrap(err, "fiat auth login attempt")
+		}
 	}
-	
+
 	return sc, nil
 }
 
