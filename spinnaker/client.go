@@ -92,15 +92,19 @@ func (c *client) pipelineURL(app string, pipelineID string) string {
 }
 
 func (c *client) fiatLoginURL() string {
-    return c.endpoint + "/login"
+	return c.endpoint + "/login"
 }
 
 func (c *client) templateExists(id string) (bool, error) {
 	url := c.pipelineTemplatesURL() + "/" + id
 	resp, _, err := c.getJSON(url)
+
 	if err != nil {
 		return false, err
 	}
+
+	logrus.WithField("status", resp.StatusCode).Debug("Response")
+
 	if resp.StatusCode == http.StatusNotFound {
 		return false, nil
 	}
@@ -138,19 +142,22 @@ func (c *client) PublishTemplate(template map[string]interface{}, options Publis
 		url = url + "?skipPlanDependents=true"
 	}
 	resp, respBody, err := c.postJSON(url, template)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "pipeline template publish")
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"status": resp.StatusCode,
+		"body":   string(respBody),
+	}).Debug("Response")
+
 	if resp.StatusCode != http.StatusAccepted {
-		fmt.Println(resp.StatusCode)
-		fmt.Println(string(respBody))
 		return nil, errors.New("create template request failed")
 	}
 
 	var ref TaskRefResponse
 	if err := json.Unmarshal(respBody, &ref); err != nil {
-		fmt.Println(string(respBody))
 		return nil, errors.New("unmarshaling create template response")
 	}
 
@@ -160,19 +167,22 @@ func (c *client) PublishTemplate(template map[string]interface{}, options Publis
 func (c *client) ApplicationSubmitTask(app string, task Task) (*TaskRefResponse, error) {
 	url := c.applicationTasksURL(app)
 	resp, respBody, err := c.postJSON(url, task)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "create application submit task")
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"status": resp.StatusCode,
+		"body":   string(respBody),
+	}).Debug("Response")
+
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println(resp.StatusCode)
-		fmt.Println(string(respBody))
 		return nil, errors.New("submit task failed")
 	}
 
 	var ref TaskRefResponse
 	if err := json.Unmarshal(respBody, &ref); err != nil {
-		fmt.Println(string(respBody))
 		return nil, errors.New("unmarshaling task create response")
 	}
 
@@ -182,9 +192,15 @@ func (c *client) ApplicationSubmitTask(app string, task Task) (*TaskRefResponse,
 func (c *client) ApplicationGet(app string) (bool, []byte, error) {
 	url := c.applicationURL(app)
 	resp, respBody, err := c.getJSON(url)
+
 	if err != nil {
 		return false, nil, errors.Wrap(err, "unable to get application info")
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"status": resp.StatusCode,
+		"body":   string(respBody),
+	}).Debug("Response")
 
 	if resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusForbidden {
 		return false, nil, nil
@@ -199,9 +215,15 @@ func (c *client) ApplicationGet(app string) (bool, []byte, error) {
 func (c *client) ApplicationList() ([]ApplicationInfo, error) {
 	url := c.applicationsURL()
 	resp, respBody, err := c.getJSON(url)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to get application list")
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"status": resp.StatusCode,
+		"body":   string(respBody),
+	}).Debug("Response")
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("Unable to fetch application list: " + strconv.Itoa(resp.StatusCode))
@@ -209,7 +231,6 @@ func (c *client) ApplicationList() ([]ApplicationInfo, error) {
 
 	var appInfo []ApplicationInfo
 	if err := json.Unmarshal(respBody, &appInfo); err != nil {
-		fmt.Println(string(respBody))
 		return nil, errors.New("unmarshaling application list")
 	}
 
@@ -225,9 +246,15 @@ func (c *client) Plan(configuration map[string]interface{}, template map[string]
 	}
 
 	resp, respBody, err := c.postJSON(c.startPipelineURL(), body)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "pipeline template plan")
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"status": resp.StatusCode,
+		"body":   string(respBody),
+	}).Debug("Response")
 
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusBadRequest {
@@ -242,9 +269,15 @@ func (c *client) Plan(configuration map[string]interface{}, template map[string]
 func (c *client) DeleteTemplate(templateID string) (*TaskRefResponse, error) {
 	url := c.pipelineTemplatesURL() + "/" + templateID
 	resp, respBody, err := c.delete(url)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "delete request failed")
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"status": resp.StatusCode,
+		"body":   string(respBody),
+	}).Debug("Response")
 
 	if resp.StatusCode != http.StatusAccepted {
 		return nil, errors.New("delete request failed")
@@ -252,7 +285,6 @@ func (c *client) DeleteTemplate(templateID string) (*TaskRefResponse, error) {
 
 	var ref TaskRefResponse
 	if err := json.Unmarshal(respBody, &ref); err != nil {
-		fmt.Println(string(respBody))
 		return nil, errors.New("failed to unmarshall delete template response")
 	}
 
@@ -261,6 +293,7 @@ func (c *client) DeleteTemplate(templateID string) (*TaskRefResponse, error) {
 
 func (c *client) GetTask(refURL string) (*ExecutionResponse, error) {
 	resp, err := c.httpClient.Get(c.endpoint + refURL)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "getting task status")
 	}
@@ -276,14 +309,17 @@ func (c *client) GetTask(refURL string) (*ExecutionResponse, error) {
 		return nil, errors.Wrapf(err, "failed to read response body from url %s", refURL)
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"status": resp.StatusCode,
+		"body":   string(respBody),
+	}).Debug("Response")
+
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println(string(respBody))
 		return nil, errors.New("get task status failed")
 	}
 
 	var task ExecutionResponse
 	if err := json.Unmarshal(respBody, &task); err != nil {
-		fmt.Println(string(respBody))
 		return nil, errors.Wrap(err, "failed unmarshaling task status response")
 	}
 
@@ -321,6 +357,7 @@ func (c *client) GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfi
 	url := c.pipelineConfigURL(app, pipelineConfigID)
 	logrus.WithField("url", url).Debug("getting url")
 	resp, err := c.httpClient.Get(url)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "getting pipeline config")
 	}
@@ -336,11 +373,15 @@ func (c *client) GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfi
 		return nil, errors.Wrapf(err, "failed to read response body from url %s", url)
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"status": resp.StatusCode,
+		"body":   string(respBody),
+	}).Debug("Response")
+
 	if resp.StatusCode != http.StatusOK {
 		if resp.StatusCode == http.StatusNotFound {
 			return nil, nil
 		}
-		fmt.Println(string(respBody))
 		return nil, errors.New("get pipeline config failed")
 	}
 
@@ -351,7 +392,6 @@ func (c *client) GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfi
 
 	var config PipelineConfig
 	if err := json.Unmarshal(respBody, &config); err != nil {
-		fmt.Println(string(respBody))
 		return nil, errors.Wrap(err, "failed unmarshaling pipeline config response")
 	}
 
@@ -361,9 +401,15 @@ func (c *client) GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfi
 func (c *client) ListPipelineConfigs(app string) ([]PipelineConfig, error) {
 	url := c.pipelineConfigsURL(app)
 	resp, respBody, err := c.getJSON(url)
+
 	if err != nil {
 		return nil, errors.Wrap(err, "unable to get pipeline list")
 	}
+
+	logrus.WithFields(logrus.Fields{
+		"status": resp.StatusCode,
+		"body":   string(respBody),
+	}).Debug("Response")
 
 	if resp.StatusCode != http.StatusOK {
 		return nil, errors.New("Unable to fetch pipeline list: " + strconv.Itoa(resp.StatusCode))
@@ -371,7 +417,6 @@ func (c *client) ListPipelineConfigs(app string) ([]PipelineConfig, error) {
 
 	var pipelineInfo []PipelineConfig
 	if err := json.Unmarshal(respBody, &pipelineInfo); err != nil {
-		fmt.Println(string(respBody))
 		return nil, errors.New("unmarshaling pipeline list")
 	}
 
@@ -382,13 +427,17 @@ func (c *client) SavePipelineConfig(pipelineConfig PipelineConfig) error {
 	url := c.pipelinesURL()
 	logrus.WithField("url", url).Debug("saving pipeline")
 	resp, respBody, err := c.postJSON(url, pipelineConfig)
+
 	if err != nil {
 		return errors.Wrap(err, "save pipeline config")
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"status": resp.StatusCode,
+		"body":   string(respBody),
+	}).Debug("Response")
+
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println(resp.StatusCode)
-		fmt.Println(string(respBody))
 		return errors.New("plan request failed")
 	}
 
@@ -400,13 +449,17 @@ func (c *client) DeletePipeline(app string, pipelineID string) error {
 	logrus.WithField("pipelineConfigID", pipelineID).Debug("deleting pipeline")
 
 	resp, respBody, err := c.delete(url)
+
 	if err != nil {
 		return errors.Wrap(err, "delete pipeline config")
 	}
 
+	logrus.WithFields(logrus.Fields{
+		"status": resp.StatusCode,
+		"body":   string(respBody),
+	}).Debug("Response")
+
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println(resp.StatusCode)
-		fmt.Println(string(respBody))
 		return errors.New("delete request failed")
 	}
 
@@ -414,14 +467,14 @@ func (c *client) DeletePipeline(app string, pipelineID string) error {
 }
 
 func (c *client) FiatLogin(fiatUser string, fiatPass string) error {
-    postURL := c.fiatLoginURL()
-    
-    data := url.Values{"username": {fiatUser}, "password": {fiatPass}, "submit": {"Login"}}
-    
-    _, _, err := c.postForm(postURL, data)
-    if err != nil {
-        return errors.Wrap(err, "fiat login")
-    }
-    
-    return nil
+	postURL := c.fiatLoginURL()
+
+	data := url.Values{"username": {fiatUser}, "password": {fiatPass}, "submit": {"Login"}}
+
+	_, _, err := c.postForm(postURL, data)
+	if err != nil {
+		return errors.Wrap(err, "fiat login")
+	}
+
+	return nil
 }
