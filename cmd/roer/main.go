@@ -23,6 +23,7 @@ func main() {
 		HTTPClientFactory: spinnaker.DefaultHTTPClientFactory,
 	}
 	if err := cmd.NewRoer(version, config).Run(os.Args); err != nil {
+		logrus.Errorf("Error: %s", err.Error())
 		os.Exit(1)
 	}
 }
