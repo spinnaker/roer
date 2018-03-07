@@ -46,7 +46,7 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 						}
 						return nil
 					},
-					Action: roer.PipelineSaveJsonAction(clientConfig),
+					Action: roer.PipelineSaveJSONAction(clientConfig),
 				},
 				{
 					Name:      "list",

@@ -2,6 +2,7 @@ package roer
 
 import "github.com/spinnaker/roer/spinnaker"
 
+// PipelineTemplate is a pipeline template
 type PipelineTemplate struct {
 	Schema        string                   `json:"schema"`
 	ID            string                   `json:"id"`
@@ -12,6 +13,7 @@ type PipelineTemplate struct {
 	Stages        []PipelineTemplateStage  `json:"stages"`
 }
 
+// PipelineTemplateMetadata metadata for a template
 type PipelineTemplateMetadata struct {
 	Name        string   `json:"name"`
 	Description string   `json:"description"`
@@ -19,6 +21,7 @@ type PipelineTemplateMetadata struct {
 	Scopes      []string `json:"scopes,omitempty"`
 }
 
+// PipelineTemplateConfig pipeline template config
 type PipelineTemplateConfig struct {
 	ConcurrentExecutions map[string]bool          `json:"concurrentExecutions,omitempty"`
 	Triggers             []map[string]interface{} `json:"triggers,omitempty"`
@@ -27,6 +30,7 @@ type PipelineTemplateConfig struct {
 	Notifications        []map[string]interface{} `json:"notifications,omitempty"`
 }
 
+// PipelineTemplateStage a pipeline template stage
 type PipelineTemplateStage struct {
 	ID                 string                                  `json:"id"`
 	Type               string                                  `json:"type"`
@@ -40,6 +44,7 @@ type PipelineTemplateStage struct {
 	InheritanceControl PipelineTemplateStageInheritanceControl `json:"inheritanceControl,omitempty"`
 }
 
+// PipelineTemplateStageInjection is a pipeline template stage injection
 type PipelineTemplateStageInjection struct {
 	First  bool     `json:"first,omitempty"`
 	Last   bool     `json:"last,omitempty"`
@@ -47,17 +52,20 @@ type PipelineTemplateStageInjection struct {
 	After  []string `json:"after,omitempty"`
 }
 
+// PipelineTemplateStageInheritanceControl pipeline template stage inheritance control
 type PipelineTemplateStageInheritanceControl struct {
 	Merge   []InheritanceControlRule `json:"merge,omitempty"`
 	Replace []InheritanceControlRule `json:"replace,omitempty"`
 	Remove  []InheritanceControlRule `json:"remove,omitempty"`
 }
 
+// InheritanceControlRule inheritance control rule
 type InheritanceControlRule struct {
 	Path  string      `json:"path"`
 	Value interface{} `json:"value"`
 }
 
+// PipelineTemplateModule pipeline template module
 type PipelineTemplateModule struct {
 	ID         string                   `json:"id"`
 	Usage      string                   `json:"usage"`
@@ -66,6 +74,7 @@ type PipelineTemplateModule struct {
 	Definition map[string]interface{}   `json:"definition"`
 }
 
+// PipelineTemplatePartial pipeline template partial
 type PipelineTemplatePartial struct {
 	ID        string                   `json:"id"`
 	Usage     string                   `json:"usage"`
@@ -73,6 +82,7 @@ type PipelineTemplatePartial struct {
 	Stages    []PipelineTemplateStage  `json:"stages"`
 }
 
+// PipelineConfiguration pipeline configuration
 type PipelineConfiguration struct {
 	Schema        string                          `json:"schema"`
 	ID            string                          `json:"id"`
@@ -83,6 +93,7 @@ type PipelineConfiguration struct {
 	Partials      []PipelineTemplatePartial       `json:"partials,omitempty"`
 }
 
+// ToClient convert PipelineConfiguration to spinnaker.PipelineConfig
 func (c PipelineConfiguration) ToClient() spinnaker.PipelineConfig {
 	// TODO rz - Should move this mapping around into orca itself
 	parallel, ok := c.Configuration.ConcurrentExecutions["parallel"]
@@ -110,6 +121,7 @@ func (c PipelineConfiguration) ToClient() spinnaker.PipelineConfig {
 	}
 }
 
+// PipelineConfig pipeline config
 type PipelineConfig struct {
 	Inherit              []string        `json:"inherit"`
 	ConcurrentExecutions map[string]bool `json:"concurrentExecutions"`
@@ -120,6 +132,7 @@ type PipelineConfig struct {
 	Description          string          `json:"description"`
 }
 
+// PipelineConfigurationDefinition pipline config definition
 type PipelineConfigurationDefinition struct {
 	Application      string                 `json:"application"`
 	Name             string                 `json:"name"`
@@ -128,6 +141,7 @@ type PipelineConfigurationDefinition struct {
 	Variables        map[string]interface{} `json:"variables"`
 }
 
+// TemplateSource template source
 type TemplateSource struct {
 	Source string `json:"source"`
 }

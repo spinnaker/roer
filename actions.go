@@ -63,6 +63,7 @@ func PipelineSaveAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
+// AppCreateAction creates the ActionFunc for creating a spinnaker application
 func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
@@ -113,6 +114,7 @@ func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
+// AppGetAction creates the ActionFunc for fetching spinnaker application configuration
 func AppGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
@@ -137,6 +139,7 @@ func AppGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
+// AppListAction creates the ActionFunc for listing applications
 func AppListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		client, err := clientFromContext(cc, clientConfig)
@@ -159,8 +162,8 @@ func AppListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
-// PipelineSaveJsonAction Save a pipeline from json source
-func PipelineSaveJsonAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+// PipelineSaveJSONAction creates the ActionFunc for saving a pipeline from json source
+func PipelineSaveJSONAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		jsonFile := cc.Args().Get(0)
 		logrus.WithField("file", jsonFile).Debug("Reading JSON payload")
@@ -196,6 +199,7 @@ func PipelineSaveJsonAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc 
 	}
 }
 
+// PipelineListConfigsAction creates the ActionFunc for listing pipeline configs
 func PipelineListConfigsAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
@@ -218,6 +222,7 @@ func PipelineListConfigsAction(clientConfig spinnaker.ClientConfig) cli.ActionFu
 	}
 }
 
+// PipelineGetConfigAction creates the ActionFunc for fetching a pipeline config
 func PipelineGetConfigAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
@@ -325,6 +330,8 @@ func PipelineTemplatePlanAction(clientConfig spinnaker.ClientConfig) cli.ActionF
 	}
 }
 
+// PipelineTemplateConvertAction creates the ActionFunc for converting an existing pipeline
+// into a pipeline template
 func PipelineTemplateConvertAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		app := cc.Args().Get(0)
@@ -358,9 +365,10 @@ func PipelineTemplateConvertAction(clientConfig spinnaker.ClientConfig) cli.Acti
 	}
 }
 
+// PipelineTemplateDeleteAction creates the ActionFunc for deleting a pipeline template
 func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
-		pipelineTemplateId := cc.Args().Get(0)
+		pipelineTemplateID := cc.Args().Get(0)
 
 		client, err := clientFromContext(cc, clientConfig)
 		if err != nil {
@@ -368,7 +376,7 @@ func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.Actio
 		}
 
 		logrus.Info("Deleting template")
-		ref, err := client.DeleteTemplate(pipelineTemplateId)
+		ref, err := client.DeleteTemplate(pipelineTemplateID)
 		if err != nil {
 			return errors.Wrap(err, "deleting pipeline template")
 		}
@@ -393,6 +401,7 @@ func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.Actio
 	}
 }
 
+// PipelineDeleteAction creates the ActionFunc for deleting a pipeline
 func PipelineDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		app := cc.Args().Get(0)

@@ -114,6 +114,7 @@ func (c *client) templateExists(id string) (bool, error) {
 	return false, errors.New("Unable to determine state of the pipeline template " + id + ", status: " + strconv.Itoa(resp.StatusCode))
 }
 
+// PublishTemplateOptions options for publishing templates
 type PublishTemplateOptions struct {
 	SkipPlan   bool
 	TemplateID string
