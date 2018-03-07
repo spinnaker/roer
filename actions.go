@@ -75,9 +75,7 @@ func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 			return errors.Wrapf(err, "reading config file: %s", configFile)
 		}
 
-		if _, ok := config["name"]; ok {
-			config["name"] = appName
-		}
+		config["name"] = appName
 
 		createAppJob := spinnaker.ApplicationJob{
 			Application: config,
