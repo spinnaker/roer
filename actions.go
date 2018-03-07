@@ -68,6 +68,7 @@ func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 		appName := cc.Args().Get(0)
 		configFile := cc.Args().Get(1)
 
+		logrus.WithField("appName", appName).Debug("Filling in create application task")
 		logrus.WithField("file", configFile).Debug("Reading application config")
 
 		config, err := readYamlFile(configFile)
