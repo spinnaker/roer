@@ -130,8 +130,8 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					Name:   "list",
 					Usage:  "list applications",
 					Action: roer.AppListAction(clientConfig),
-                },
-                {
+				},
+				{
 					Name:      "exec",
 					Usage:     "execute pipeline",
 					ArgsUsage: "[application name] [pipeline name]",
