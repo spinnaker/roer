@@ -12,15 +12,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spinnaker/roer/spinnaker"
 	"gopkg.in/urfave/cli.v1"
-	"regexp"
-	"strings"
-)
-
-type FileType int
-
-const (
-  JSON FileType = iota
-	YAML
 )
 
 // PipelineSaveAction creates the ActionFunc for saving pipeline configurations.
