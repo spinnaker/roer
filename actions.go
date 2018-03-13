@@ -152,7 +152,7 @@ func AppDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 			return errors.Wrapf(err, "submitting task")
 		}
 
-		resp, err := client.PollTaskStatus(ref.Ref, 1*time.Minute)
+		resp, err := client.PollTaskStatus(ref.Ref, time.Duration(cc.GlobalInt("timeout"))*time.Second)
 		if err != nil {
 			return errors.Wrap(err, "poll delete app status")
 		}
