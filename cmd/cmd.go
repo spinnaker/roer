@@ -46,7 +46,7 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 						}
 						return nil
 					},
-					Action: roer.PipelineSaveJsonAction(clientConfig),
+					Action: roer.PipelineSaveJSONAction(clientConfig),
 				},
 				{
 					Name:      "list",
@@ -238,6 +238,11 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 		cli.BoolFlag{
 			Name:  "verbose, v",
 			Usage: "show debug messages",
+		},
+		cli.IntFlag{
+		    Name:  "timeout",
+		    Usage: "Timeout (in seconds) for API request status polling.",
+		    Value: 60,
 		},
 		cli.StringFlag{
 			Name:  "certPath, c",

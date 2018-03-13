@@ -33,17 +33,20 @@ type TemplatedPipelineError struct {
 	NestedErrors []TemplatedPipelineError `json:"nestedErrors"`
 }
 
+// Task is a single task
 type Task struct {
 	Application string        `json:"application"`
 	Description string        `json:"description"`
-	Job         []interface{} `json:"job,omitempty""`
+	Job         []interface{} `json:"job,omitempty"`
 }
 
+// ApplicationJob create application data
 type ApplicationJob struct {
 	Application map[string]interface{} `json:"application"`
 	Type        string                 `json:"type"`
 }
 
+// ApplicationAttributes application attributes
 type ApplicationAttributes struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
@@ -115,6 +118,7 @@ type RetrofitErrorResponse struct {
 	URL          string   `mapstructure:"url"`
 }
 
+// PipelineConfig represents full pipeline config
 type PipelineConfig struct {
 	ID                   string                   `json:"id,omitempty"`
 	Type                 string                   `json:"type,omitempty"`
@@ -135,10 +139,12 @@ type PipelineConfig struct {
 	UpdateTs             string                   `json:"updateTs"`
 }
 
+// ApplicationInfo application info
 type ApplicationInfo struct {
 	Name string `json:"name"`
 }
 
+// PipelineLock pipeline lock
 type PipelineLock struct {
 	AllowUnlockUI bool   `json:"allowUnlockUi"`
 	Description   string `json:"description"`

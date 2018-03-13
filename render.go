@@ -12,7 +12,7 @@ func prettyPrintJSON(j []byte) {
 	var pretty bytes.Buffer
 	if err := json.Indent(&pretty, j, "", "  "); err != nil {
 		logrus.WithError(err).Warn("failed prettyifying response")
-		fmt.Println(string(j))
+		logrus.Error(string(j))
 		return
 	}
 	fmt.Println(string(pretty.Bytes()))

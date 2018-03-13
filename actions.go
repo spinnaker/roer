@@ -63,6 +63,7 @@ func PipelineSaveAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
+// AppCreateAction creates the ActionFunc for creating a spinnaker application
 func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
@@ -100,7 +101,7 @@ func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 			return errors.Wrapf(err, "submitting task")
 		}
 
-		resp, err := client.PollTaskStatus(ref.Ref, 1*time.Minute)
+		resp, err := client.PollTaskStatus(ref.Ref, time.Duration(cc.GlobalInt("timeout"))*time.Second)
 		if err != nil {
 			return errors.Wrap(err, "poll create app status")
 		}
@@ -110,7 +111,7 @@ func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 			if retrofitErr := resp.ExtractRetrofitError(); retrofitErr != nil {
 				prettyPrintJSON([]byte(retrofitErr.ResponseBody))
 			} else {
-				fmt.Printf("%#v\n", resp)
+				logrus.Debugf("Response data %#v", resp)
 			}
 		} else {
 			logrus.WithField("status", resp.Status).Info("Task completed")
@@ -171,6 +172,7 @@ func AppDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
+// AppGetAction creates the ActionFunc for fetching spinnaker application configuration
 func AppGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
@@ -187,7 +189,7 @@ func AppGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 		}
 
 		if exists == false {
-			fmt.Println("App does not exist or insufficient permission")
+			logrus.Error("App does not exist or insufficient permission")
 			return fmt.Errorf("Could not fetch app info")
 		}
 		prettyPrintJSON(appInfo)
@@ -195,6 +197,7 @@ func AppGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
+// AppListAction creates the ActionFunc for listing applications
 func AppListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		client, err := clientFromContext(cc, clientConfig)
@@ -210,15 +213,15 @@ func AppListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 		}
 
 		for _, app := range appInfo {
-			fmt.Println(app.Name)
+			logrus.Debug(app.Name)
 		}
 
 		return nil
 	}
 }
 
-// Save a pipeline from json source
-func PipelineSaveJsonAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+// PipelineSaveJSONAction creates the ActionFunc for saving a pipeline from json source
+func PipelineSaveJSONAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		jsonFile := cc.Args().Get(0)
 		logrus.WithField("file", jsonFile).Debug("Reading JSON payload")
@@ -254,6 +257,7 @@ func PipelineSaveJsonAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc 
 	}
 }
 
+// PipelineListConfigsAction creates the ActionFunc for listing pipeline configs
 func PipelineListConfigsAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
@@ -270,12 +274,13 @@ func PipelineListConfigsAction(clientConfig spinnaker.ClientConfig) cli.ActionFu
 		}
 
 		for _, pipeline := range pipelineInfo {
-			fmt.Println(pipeline.Name)
+			logrus.Debug(pipeline.Name)
 		}
 		return nil
 	}
 }
 
+// PipelineGetConfigAction creates the ActionFunc for fetching a pipeline config
 func PipelineGetConfigAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
@@ -293,7 +298,7 @@ func PipelineGetConfigAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc
 		}
 
 		jsonStr, _ := json.Marshal(pipelineConfig)
-		fmt.Println(string(jsonStr))
+		logrus.Debug(string(jsonStr))
 		return nil
 	}
 }
@@ -328,7 +333,7 @@ func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.Acti
 			return errors.Wrap(err, "publishing template")
 		}
 
-		resp, err := client.PollTaskStatus(ref.Ref, 1*time.Minute)
+		resp, err := client.PollTaskStatus(ref.Ref, time.Duration(cc.GlobalInt("timeout"))*time.Second)
 		if err != nil {
 			return errors.Wrap(err, "polling task status")
 		}
@@ -338,7 +343,7 @@ func PipelineTemplatePublishAction(clientConfig spinnaker.ClientConfig) cli.Acti
 			if retrofitErr := resp.ExtractRetrofitError(); retrofitErr != nil {
 				prettyPrintJSON([]byte(retrofitErr.ResponseBody))
 			} else {
-				fmt.Printf("%#v\n", resp)
+				logrus.Debugf("Response data %#v", resp)
 			}
 		} else {
 			logrus.WithField("status", resp.Status).Info("Task completed")
@@ -374,7 +379,7 @@ func PipelineTemplatePlanAction(clientConfig spinnaker.ClientConfig) cli.ActionF
 				prettyPrintJSON(resp)
 				return nil
 			}
-			fmt.Println(string(resp))
+			logrus.Debug(string(resp))
 			return errors.Wrap(err, "planning configuration")
 		}
 
@@ -383,6 +388,8 @@ func PipelineTemplatePlanAction(clientConfig spinnaker.ClientConfig) cli.ActionF
 	}
 }
 
+// PipelineTemplateConvertAction creates the ActionFunc for converting an existing pipeline
+// into a pipeline template
 func PipelineTemplateConvertAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		app := cc.Args().Get(0)
@@ -395,7 +402,7 @@ func PipelineTemplateConvertAction(clientConfig spinnaker.ClientConfig) cli.Acti
 
 		resp, err := client.GetPipelineConfig(app, pipelineConfigID)
 		if err != nil {
-			fmt.Println(resp)
+			logrus.Debug(resp)
 			return errors.Wrap(err, "getting pipeline config")
 		}
 
@@ -409,16 +416,17 @@ func PipelineTemplateConvertAction(clientConfig spinnaker.ClientConfig) cli.Acti
 			return errors.Wrap(err, "marshaling template to YAML")
 		}
 
-		fmt.Println(generatedTemplateHeader)
-		fmt.Println(string(template))
+		logrus.Debug(generatedTemplateHeader)
+		logrus.Debug(string(template))
 
 		return nil
 	}
 }
 
+// PipelineTemplateDeleteAction creates the ActionFunc for deleting a pipeline template
 func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
-		pipelineTemplateId := cc.Args().Get(0)
+		pipelineTemplateID := cc.Args().Get(0)
 
 		client, err := clientFromContext(cc, clientConfig)
 		if err != nil {
@@ -426,12 +434,12 @@ func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.Actio
 		}
 
 		logrus.Info("Deleting template")
-		ref, err := client.DeleteTemplate(pipelineTemplateId)
+		ref, err := client.DeleteTemplate(pipelineTemplateID)
 		if err != nil {
 			return errors.Wrap(err, "deleting pipeline template")
 		}
 
-		resp, err := client.PollTaskStatus(ref.Ref, 1*time.Minute)
+		resp, err := client.PollTaskStatus(ref.Ref, time.Duration(cc.GlobalInt("timeout"))*time.Second)
 		if err != nil {
 			return errors.Wrap(err, "polling task status")
 		}
@@ -441,7 +449,7 @@ func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.Actio
 			if retrofitErr := resp.ExtractRetrofitError(); retrofitErr != nil {
 				prettyPrintJSON([]byte(retrofitErr.ResponseBody))
 			} else {
-				fmt.Printf("%#v\n", resp)
+				logrus.Debugf("Response data %#v", resp)
 			}
 		} else {
 			logrus.WithField("status", resp.Status).Info("Task completed")
@@ -451,6 +459,7 @@ func PipelineTemplateDeleteAction(clientConfig spinnaker.ClientConfig) cli.Actio
 	}
 }
 
+// PipelineDeleteAction creates the ActionFunc for deleting a pipeline
 func PipelineDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		app := cc.Args().Get(0)
