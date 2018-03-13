@@ -1,0 +1,15 @@
+---
+# set application config here
+# the `name` key does not need to be set
+# and will be overridden by the name cli arg
+email: test@email.com
+cloudProviders:
+  - aws
+repoType: github
+repoProjectKey: testapp
+instancePort: 81
+providerSettings:
+  aws:
+    useAmiBlockDeviceMappings: false
+  gcp:
+    associatePublicIpAddress: false

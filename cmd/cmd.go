@@ -93,14 +93,26 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 				{
 					Name:      "create",
 					Usage:     "create or update an application",
-					ArgsUsage: "[app name] [owner email]",
+					ArgsUsage: "[app name] [config.yml]",
 					Before: func(cc *cli.Context) error {
 						if cc.NArg() != 2 {
-							return errors.New("both application name and owner email are required")
+							return errors.New("both application name and configuration are required")
 						}
 						return nil
 					},
 					Action: roer.AppCreateAction(clientConfig),
+				},
+				{
+					Name:      "delete",
+					Usage:     "delete an application",
+					ArgsUsage: "[app name]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 1 {
+							return errors.New("application name is required")
+						}
+						return nil
+					},
+					Action: roer.AppDeleteAction(clientConfig),
 				},
 				{
 					Name:      "get",

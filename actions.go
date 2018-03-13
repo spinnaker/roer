@@ -67,16 +67,23 @@ func PipelineSaveAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
-		ownerEmail := cc.Args().Get(1)
-		logrus.WithField("appName", appName).Debug("Filling in create application task")
+		configFile := cc.Args().Get(1)
 
-		createAppJob := spinnaker.CreateApplicationJob{
-			Application: spinnaker.ApplicationAttributes{
-				Email: ownerEmail,
-				Name:  appName,
-			},
-			Type: "createApplication",
+		logrus.WithField("appName", appName).Debug("Filling in create application task")
+		logrus.WithField("file", configFile).Debug("Reading application config")
+
+		config, err := readYamlFile(configFile)
+		if err != nil {
+			return errors.Wrapf(err, "reading config file: %s", configFile)
 		}
+
+		config["name"] = appName
+
+		createAppJob := spinnaker.ApplicationJob{
+			Application: config,
+			Type:        "createApplication",
+		}
+
 		createApp := spinnaker.Task{
 			Application: appName,
 			Description: "Create Application: " + appName,
@@ -105,6 +112,57 @@ func AppCreateAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 				prettyPrintJSON([]byte(retrofitErr.ResponseBody))
 			} else {
 				logrus.Debugf("Response data %#v", resp)
+			}
+		} else {
+			logrus.WithField("status", resp.Status).Info("Task completed")
+		}
+
+		return nil
+	}
+}
+
+// AppDeleteAction delete an application
+func AppDeleteAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		appName := cc.Args().Get(0)
+
+		config := make(map[string]interface{})
+
+		config["name"] = appName
+
+		deleteAppJob := spinnaker.ApplicationJob{
+			Application: config,
+			Type:        "deleteApplication",
+		}
+
+		deleteApp := spinnaker.Task{
+			Application: appName,
+			Description: "Delete Application: " + appName,
+			Job:         []interface{}{deleteAppJob},
+		}
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		logrus.Info("Sending delete app task")
+		ref, err := client.ApplicationSubmitTask(appName, deleteApp)
+		if err != nil {
+			return errors.Wrapf(err, "submitting task")
+		}
+
+		resp, err := client.PollTaskStatus(ref.Ref, time.Duration(cc.GlobalInt("timeout"))*time.Second)
+		if err != nil {
+			return errors.Wrap(err, "poll delete app status")
+		}
+
+		if resp.Status == "TERMINAL" {
+			logrus.WithField("status", resp.Status).Error("Task failed")
+			if retrofitErr := resp.ExtractRetrofitError(); retrofitErr != nil {
+				prettyPrintJSON([]byte(retrofitErr.ResponseBody))
+			} else {
+				fmt.Printf("%#v\n", resp)
 			}
 		} else {
 			logrus.WithField("status", resp.Status).Info("Task completed")

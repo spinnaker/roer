@@ -40,10 +40,10 @@ type Task struct {
 	Job         []interface{} `json:"job,omitempty"`
 }
 
-// CreateApplicationJob create application data
-type CreateApplicationJob struct {
-	Application ApplicationAttributes `json:"application"`
-	Type        string                `json:"type"`
+// ApplicationJob create application data
+type ApplicationJob struct {
+	Application map[string]interface{} `json:"application"`
+	Type        string                 `json:"type"`
 }
 
 // ApplicationAttributes application attributes
