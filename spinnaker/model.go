@@ -62,7 +62,7 @@ type TaskRefResponse struct {
 // execution.
 type ExecutionResponse struct {
 	ID          string              `json:"id"`
-	Name        string              `json:"string"`
+	Name        string              `json:"name"`
 	Application string              `json:"application"`
 	Status      string              `json:"status"`
 	BuildTime   int                 `json:"buildTime"`

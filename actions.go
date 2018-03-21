@@ -220,8 +220,30 @@ func AppListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
-// PipelineSaveJSONAction creates the ActionFunc for saving a pipeline from json source
-func PipelineSaveJSONAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+func AppHistoryAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		appName := cc.Args().Get(0)
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		history, err := client.ApplicationHistory(appName)
+		if err != nil {
+			return errors.Wrap(err, "Fetching application history")
+		}
+
+		for _, exec := range history {
+			fmt.Printf("%d %s %s\n", exec.StartTime, exec.Name, exec.Status)
+		}
+
+		return nil
+	}
+}
+
+// Save a pipeline from json source
+func PipelineSaveJsonAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		jsonFile := cc.Args().Get(0)
 		logrus.WithField("file", jsonFile).Debug("Reading JSON payload")

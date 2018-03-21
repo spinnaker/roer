@@ -131,6 +131,18 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					Usage:  "list applications",
 					Action: roer.AppListAction(clientConfig),
 				},
+				{
+					Name:      "history",
+					Usage:     "list pipeline executions",
+					ArgsUsage: "[app name]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 1 {
+							return errors.New("application name is required")
+						}
+						return nil
+					},
+					Action: roer.AppHistoryAction(clientConfig),
+				},
 			},
 		},
 		{
@@ -240,9 +252,9 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 			Usage: "show debug messages",
 		},
 		cli.IntFlag{
-		    Name:  "timeout",
-		    Usage: "Timeout (in seconds) for API request status polling.",
-		    Value: 60,
+			Name:  "timeout",
+			Usage: "Timeout (in seconds) for API request status polling.",
+			Value: 60,
 		},
 		cli.StringFlag{
 			Name:  "certPath, c",
