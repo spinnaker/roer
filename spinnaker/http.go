@@ -27,7 +27,7 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 		logrus.Panic("cli context has not been set")
 	}
 	var c http.Client
-    cookieJar, _ := cookiejar.New(nil)
+	cookieJar, _ := cookiejar.New(nil)
 
 	if cc.GlobalIsSet("apiSession") {
 		var cookies []*http.Cookie
@@ -40,10 +40,10 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 		cookieJar.SetCookies(u, cookies)
 	}
 
-    c = http.Client{
-        Timeout: 10 * time.Second,
-        Jar:     cookieJar,
-    }
+	c = http.Client{
+		Timeout: 10 * time.Second,
+		Jar:     cookieJar,
+	}
 
 	var certPath string
 	var keyPath string
@@ -64,8 +64,8 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 	}
 
 	c.Transport = &http.Transport{
-        TLSClientConfig: &tls.Config{},
-    }
+		TLSClientConfig: &tls.Config{},
+	}
 
 	if certPath != "" && keyPath != "" {
 		logrus.Debug("Configuring TLS with pem cert/key pair")
@@ -89,7 +89,7 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 	}
 
 	if cc.GlobalIsSet("insecure") {
-	    c.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify = true
+		c.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify = true
 	}
 
 	return &c, nil
@@ -100,7 +100,6 @@ func (c *client) postJSON(url string, body interface{}) (resp *http.Response, re
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "marshaling body to json")
 	}
-	logrus.WithField("url", url).Debug("http post")
 	resp, err = c.httpClient.Post(url, "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "posting to %s", url)
@@ -121,23 +120,23 @@ func (c *client) postJSON(url string, body interface{}) (resp *http.Response, re
 }
 
 func (c *client) postForm(url string, data url.Values) (resp *http.Response, respBody []byte, err error) {
-    resp, err = c.httpClient.PostForm(url, data)
-    if err != nil {
-        return nil, nil, errors.Wrapf(err, "posting to %s", url)
-    }
+	resp, err = c.httpClient.PostForm(url, data)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "posting to %s", url)
+	}
 
-    defer func() {
-        if cerr := resp.Body.Close(); cerr != nil && err != nil {
-            err = errors.Wrapf(err, "failed to close response body from %s", url)
-        }
-    }()
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil && err != nil {
+			err = errors.Wrapf(err, "failed to close response body from %s", url)
+		}
+	}()
 
-    respBody, err = ioutil.ReadAll(resp.Body)
-    if err != nil {
-        return nil, nil, errors.Wrapf(err, "failed to read response body from url %s", url)
-    }
+	respBody, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, nil, errors.Wrapf(err, "failed to read response body from url %s", url)
+	}
 
-    return resp, respBody, nil
+	return resp, respBody, nil
 }
 
 func (c *client) getJSON(url string) (resp *http.Response, respBody []byte, err error) {
