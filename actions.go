@@ -243,7 +243,7 @@ func AppHistoryAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 }
 
 // Save a pipeline from json source
-func PipelineSaveJsonAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+func PipelineSaveJSONAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		jsonFile := cc.Args().Get(0)
 		logrus.WithField("file", jsonFile).Debug("Reading JSON payload")
