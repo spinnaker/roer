@@ -33,6 +33,7 @@ type Client interface {
 	ApplicationSubmitTask(app string, task Task) (*TaskRefResponse, error)
 	ApplicationGet(app string) (bool, []byte, error)
 	ApplicationList() ([]ApplicationInfo, error)
+	ApplicationHistory(app string) ([]ExecutionResponse, error)
 	Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error)
 	DeleteTemplate(templateID string) (*TaskRefResponse, error)
 	ExecPipeline(appName string, pipeline string) (*TaskRefResponse, error)
@@ -44,6 +45,7 @@ type Client interface {
 	ListPipelineConfigs(app string) ([]PipelineConfig, error)
 	DeletePipeline(app, pipelineConfigID string) error
 	FiatLogin(fiatUser string, fiatPass string) error
+	Execution(execID string) ([]byte, error)
 }
 
 type client struct {
@@ -86,6 +88,14 @@ func (c *client) applicationURL(app string) string {
 
 func (c *client) applicationsURL() string {
 	return c.endpoint + "/applications"
+}
+
+func (c *client) applicationExecutions(app string) string {
+	return fmt.Sprintf("%s/applications/%s/pipelines", c.endpoint, app)
+}
+
+func (c *client) executionURL(execID string) string {
+	return fmt.Sprintf("%s/pipelines/%s", c.endpoint, execID)
 }
 
 func (c *client) pipelineURL(app string, pipelineID string) string {
@@ -237,6 +247,25 @@ func (c *client) ApplicationList() ([]ApplicationInfo, error) {
 	}
 
 	return appInfo, nil
+}
+
+func (c *client) ApplicationHistory(app string) ([]ExecutionResponse, error) {
+	url := c.applicationExecutions(app)
+	resp, respBody, err := c.getJSON(url)
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to fetch executions for "+app)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Unable to fetch executions: " + strconv.Itoa(resp.StatusCode))
+	}
+
+	var history []ExecutionResponse
+	if err := json.Unmarshal(respBody, &history); err != nil {
+		return nil, errors.Wrap(err, "Error unmarshaling executions")
+	}
+
+	return history, nil
 }
 
 func (c *client) Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error) {
@@ -491,4 +520,19 @@ func (c *client) FiatLogin(fiatUser string, fiatPass string) error {
 	}
 
 	return nil
+}
+
+func (c *client) Execution(execID string) ([]byte, error) {
+	url := c.executionURL(execID)
+
+	resp, respBody, err := c.getJSON(url)
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to fetch execution "+execID)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Unable to fetch execution: " + strconv.Itoa(resp.StatusCode))
+	}
+
+	return respBody, nil
 }

@@ -269,7 +269,51 @@ func AppListAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	}
 }
 
-// PipelineSaveJSONAction creates the ActionFunc for saving a pipeline from json source
+func AppHistoryAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		appName := cc.Args().Get(0)
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		history, err := client.ApplicationHistory(appName)
+		if err != nil {
+			return errors.Wrap(err, "Fetching application history")
+		}
+
+		pipelineName := cc.String("pipeline")
+		for _, e := range history {
+			if pipelineName == "" || pipelineName == e.Name {
+				fmt.Printf("%d %s %s %s\n", e.StartTime, e.ID, e.Status, e.Name)
+			}
+		}
+
+		return nil
+	}
+}
+
+func ExecGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		execID := cc.Args().Get(0)
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrap(err, "creating spinnaker client")
+		}
+
+		exec, err := client.Execution(execID)
+		if err != nil {
+			return errors.Wrap(err, "Fetching execution")
+		}
+
+		prettyPrintJSON(exec)
+		return nil
+	}
+}
+
+// Save a pipeline from json source
 func PipelineSaveJSONAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		jsonFile := cc.Args().Get(0)
