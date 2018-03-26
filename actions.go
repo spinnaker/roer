@@ -234,10 +234,32 @@ func AppHistoryAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 			return errors.Wrap(err, "Fetching application history")
 		}
 
-		for _, exec := range history {
-			fmt.Printf("%d %s %s\n", exec.StartTime, exec.Name, exec.Status)
+		pipelineName := cc.String("pipeline")
+		for _, e := range history {
+			if pipelineName == "" || pipelineName == e.Name {
+				fmt.Printf("%d %s %s %s\n", e.StartTime, e.ID, e.Status, e.Name)
+			}
 		}
 
+		return nil
+	}
+}
+
+func ExecGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		execID := cc.Args().Get(0)
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrap(err, "creating spinnaker client")
+		}
+
+		exec, err := client.Execution(execID)
+		if err != nil {
+			return errors.Wrap(err, "Fetching execution")
+		}
+
+		prettyPrintJSON(exec)
 		return nil
 	}
 }

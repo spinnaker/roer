@@ -44,6 +44,7 @@ type Client interface {
 	ListPipelineConfigs(app string) ([]PipelineConfig, error)
 	DeletePipeline(app, pipelineConfigID string) error
 	FiatLogin(fiatUser string, fiatPass string) error
+	Execution(execID string) ([]byte, error)
 }
 
 type client struct {
@@ -90,6 +91,10 @@ func (c *client) applicationsURL() string {
 
 func (c *client) applicationExecutions(app string) string {
 	return fmt.Sprintf("%s/applications/%s/pipelines", c.endpoint, app)
+}
+
+func (c *client) executionURL(execID string) string {
+	return fmt.Sprintf("%s/pipelines/%s", c.endpoint, execID)
 }
 
 func (c *client) pipelineURL(app string, pipelineID string) string {
@@ -502,4 +507,19 @@ func (c *client) FiatLogin(fiatUser string, fiatPass string) error {
 	}
 
 	return nil
+}
+
+func (c *client) Execution(execID string) ([]byte, error) {
+	url := c.executionURL(execID)
+
+	resp, respBody, err := c.getJSON(url)
+	if err != nil {
+		return nil, errors.Wrap(err, "Unable to fetch execution "+execID)
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Unable to fetch execution: " + strconv.Itoa(resp.StatusCode))
+	}
+
+	return respBody, nil
 }
