@@ -1,3 +1,10 @@
+# WARNING
+
+This fork is managed in a unique way because we have multiple feature branches
+and the master is tracking an open source package. See the process at
+https://github.com/Armory/roer/wiki/Fork-Management for info about what we've
+been doing so far.
+
 # roer
 
 A thin CLI for Spinnaker.
