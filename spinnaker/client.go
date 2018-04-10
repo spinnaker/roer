@@ -35,6 +35,7 @@ type Client interface {
 	ApplicationList() ([]ApplicationInfo, error)
 	Plan(configuration map[string]interface{}, template map[string]interface{}) ([]byte, error)
 	DeleteTemplate(templateID string) (*TaskRefResponse, error)
+	ExecPipeline(appName string, pipeline string) (*TaskRefResponse, error)
 	// Run(configuration interface{}) ([]byte, error)
 	GetTask(refURL string) (*ExecutionResponse, error)
 	PollTaskStatus(refURL string, timeout time.Duration) (*ExecutionResponse, error)
@@ -340,6 +341,7 @@ func (c *client) PollTaskStatus(refURL string, timeout time.Duration) (*Executio
 			return nil, errors.Wrap(err, "failed polling task status")
 		}
 		if resp.EndTime > 0 {
+			logrus.Info("Pipeline has completed")
 			return resp, nil
 		}
 
@@ -422,6 +424,17 @@ func (c *client) ListPipelineConfigs(app string) ([]PipelineConfig, error) {
 	}
 
 	return pipelineInfo, nil
+}
+
+func (c *client) ExecPipeline(appName string, pipelineName string) (*TaskRefResponse, error) {
+	_, respBody, err := c.postJSON(fmt.Sprintf("%s/pipelines/%s/%s", c.endpoint, appName, pipelineName), nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "executing pipeline")
+	}
+
+	var taskResponse TaskRefResponse
+	err = json.Unmarshal(respBody, &taskResponse)
+	return &taskResponse, errors.Wrapf(err, "failed unmarshalling task response: %s", respBody)
 }
 
 func (c *client) SavePipelineConfig(pipelineConfig PipelineConfig) error {
