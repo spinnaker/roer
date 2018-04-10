@@ -1,5 +1,7 @@
 # roer
 
+**Note: A new, better CLI is on the way. This tool is in maintenance mode.**
+
 A thin CLI for Spinnaker.
 
 This project is aimed to provide a thin, limited client that's suitable for
