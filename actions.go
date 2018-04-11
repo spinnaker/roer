@@ -245,7 +245,7 @@ func AppGetAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 		if err != nil {
 			return fmt.Errorf("could not unmarshal: %v", err)
 		}
-		fmt.Println(appYaml)
+		fmt.Printf("%s", appYaml)
 		return nil
 	}
 }
