@@ -134,11 +134,7 @@ $ SPINNAKER_API=https://localhost:7002 \
 
 # Development
 
-Install [glide][glide], then install the dependencies:
-
-`$ glide i`
-
-To run:
+All dependencies have been vendored into the repository.
 
 `$ go run cmd/roer/main.go`
 
