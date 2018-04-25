@@ -134,7 +134,8 @@ $ SPINNAKER_API=https://localhost:7002 \
 
 # Development
 
-All dependencies have been vendored into the repository.
+All dependencies have been vendored into the repository and are managed via
+[govendor](github.com/kardianos/govendor). You can sync the deps with `govendor sync`.
 
 `$ go run cmd/roer/main.go`
 
