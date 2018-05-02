@@ -227,6 +227,7 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 				{
 					Name:  "delete",
 					Usage: "deletes a pipeline template",
+					ArgsUsage: "[templateId]"
 					Flags: []cli.Flag{
 						cli.StringFlag{
 							Name:  "id",
