@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spinnaker/roer"
 	"github.com/spinnaker/roer/spinnaker"
-	"gopkg.in/urfave/cli.v1"
+	"github.com/urfave/cli"
 )
 
 // NewRoer returns a new instance of the OSS roer application
@@ -265,6 +265,11 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 			Name:  "timeout",
 			Usage: "Timeout (in seconds) for API request status polling.",
 			Value: 60,
+		},
+		cli.IntFlag{
+			Name:  "clientTimeout",
+			Usage: "HTTP client connection timeout (in seconds).",
+			Value: 10,
 		},
 		cli.StringFlag{
 			Name:  "certPath, c",

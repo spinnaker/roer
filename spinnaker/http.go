@@ -14,7 +14,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/urfave/cli.v1"
+	"github.com/urfave/cli"
 )
 
 // HTTPClientFactory creates a new http.Client from the cli.Context
@@ -41,7 +41,7 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 	}
 
 	c = http.Client{
-		Timeout: 10 * time.Second,
+		Timeout: time.Duration(cc.GlobalInt("clientTimeout")) * time.Second,
 		Jar:     cookieJar,
 	}
 
