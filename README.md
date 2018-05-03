@@ -1,4 +1,10 @@
-# roer
+# roer-echo
+
+**This is a server used for roer execution with RESTful interface**.
+
+The RESTful document is in [doc/RESTful.md](https://github.com/KeisukeYamashita/roer/blob/master/doc/RESTful.md).
+
+ Check out for details.
 
 **Note: A new, better CLI is on the way. This tool is in maintenance mode.**
 
