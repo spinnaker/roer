@@ -226,6 +226,22 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					Action: roer.PipelineTemplatePublishAction(clientConfig),
 				},
 				{
+					Name:  "render",
+					Usage: "render a pipeline json based on a template using string substitution",
+					Description: `
+		Given a pipeline template render a pipeline JSON locally. A json file with
+		values is substituted to keys in the given JSON template
+					`,
+					ArgsUsage: "[template.json] [values.json] [output.json]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 3 {
+							return errors.New("path to template.json, values.json and output.json are required")
+						}
+						return nil
+					},
+					Action: roer.PipelineTemplateRenderAction(clientConfig),
+				},
+				{
 					Name:  "plan",
 					Usage: "validate a pipeline template and or plan a configuration",
 					Description: `
