@@ -272,12 +272,14 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 			Value: 10,
 		},
 		cli.StringFlag{
-			Name:  "certPath, c",
-			Usage: "HTTPS x509 cert path",
+			Name:   "certPath, c",
+			Usage:  "HTTPS x509 cert path",
+			EnvVar: "CERT_PATH",
 		},
 		cli.StringFlag{
-			Name:  "keyPath, k",
-			Usage: "HTTPS x509 key path",
+			Name:   "keyPath, k",
+			Usage:  "HTTPS x509 key path",
+			EnvVar: "KEY_PATH",
 		},
 		cli.StringFlag{
 			Name:  "apiSession, as",
