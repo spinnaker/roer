@@ -52,6 +52,12 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 					Name:      "list",
 					Usage:     "list all the pipelines in an application",
 					ArgsUsage: "[application name]",
+					Flags: []cli.Flag{
+						cli.BoolFlag{
+							Name:  "machine-output",
+							Usage: "Output the list of pipelines in a machine friendly (JSON) format",
+						},
+					},
 					Before: func(cc *cli.Context) error {
 						if cc.NArg() != 1 {
 							return errors.New("name of application is required")
@@ -59,6 +65,18 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 						return nil
 					},
 					Action: roer.PipelineListConfigsAction(clientConfig),
+				},
+				{
+					Name:      "savealljson",
+					Usage:     "Save all of the pipelines for a given application",
+					ArgsUsage: "[application name]",
+					Before: func(cc *cli.Context) error {
+						if cc.NArg() != 1 {
+							return errors.New("name of application is required")
+						}
+						return nil
+					},
+					Action: roer.PipelineSaveConfigsAction(clientConfig),
 				},
 				{
 					Name:      "get",

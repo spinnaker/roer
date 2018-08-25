@@ -12,6 +12,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spinnaker/roer/spinnaker"
 	"github.com/urfave/cli"
+	"os"
 )
 
 // PipelineExecAction requests a pipeline execution and optionally waits for
@@ -314,7 +315,35 @@ func PipelineSaveJSONAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc 
 func PipelineListConfigsAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
 	return func(cc *cli.Context) error {
 		appName := cc.Args().Get(0)
-		logrus.WithField("app", appName).Debug("Fetching pipelines")
+		machineOutput := cc.Bool("machine-output")
+		logrus.WithField("app", appName).WithField("machine-output", machineOutput).Debug("Fetching pipelines")
+
+		client, err := clientFromContext(cc, clientConfig)
+		if err != nil {
+			return errors.Wrapf(err, "creating spinnaker client")
+		}
+
+		pipelineInfo, err := client.ListPipelineConfigs(appName)
+		if err != nil {
+			return errors.Wrap(err, "Fetching pipelines")
+		}
+
+		pipelines := make([]string, len(pipelineInfo))
+		for idx, pipeline := range pipelineInfo {
+			logrus.Info(pipeline.Name)
+			pipelines[idx] = pipeline.Name
+		}
+		if machineOutput {
+			return json.NewEncoder(os.Stdout).Encode(pipelines)
+		}
+		return nil
+	}
+}
+
+// PipelineListConfigsAction creates the ActionFunc for listing pipeline configs
+func PipelineSaveConfigsAction(clientConfig spinnaker.ClientConfig) cli.ActionFunc {
+	return func(cc *cli.Context) error {
+		appName := cc.Args().Get(0)
 
 		client, err := clientFromContext(cc, clientConfig)
 		if err != nil {
@@ -327,8 +356,17 @@ func PipelineListConfigsAction(clientConfig spinnaker.ClientConfig) cli.ActionFu
 		}
 
 		for _, pipeline := range pipelineInfo {
-			logrus.Info(pipeline.Name)
+			outputFileName := pipeline.ID + ".json"
+			out, err := os.OpenFile(outputFileName, os.O_RDWR|os.O_CREATE, 0644)
+			if err != nil {
+				return err
+			}
+			defer out.Close()
+			encoder := json.NewEncoder(out)
+			encoder.SetIndent("", "\t")
+			encoder.Encode(pipeline)
 		}
+
 		return nil
 	}
 }
