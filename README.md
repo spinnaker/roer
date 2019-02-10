@@ -124,7 +124,7 @@ $ SPINNAKER_API=https://localhost:7002 \
 
 ## pipeline
 
-Create or update a managed pipeline within an applicaiton:
+Create or update a managed pipeline within an application:
 
 ```json
 $ SPINNAKER_API=https://localhost:7002 \
