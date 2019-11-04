@@ -1,6 +1,6 @@
 # roer
 
-**Note: A new, better CLI is on the way. This tool is in maintenance mode.**
+**END OF LIFE: Roer has been EOL'd. Please use `spin` instead: https://github.com/spinnaker/spin**
 
 A thin CLI for Spinnaker.
 
