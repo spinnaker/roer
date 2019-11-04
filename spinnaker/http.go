@@ -14,7 +14,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"github.com/urfave/cli"
+	"gopkg.in/urfave/cli.v1"
 )
 
 // HTTPClientFactory creates a new http.Client from the cli.Context

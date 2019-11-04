@@ -7,7 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spinnaker/roer"
 	"github.com/spinnaker/roer/spinnaker"
-	"github.com/urfave/cli"
+	"gopkg.in/urfave/cli.v1"
 )
 
 // NewRoer returns a new instance of the OSS roer application
