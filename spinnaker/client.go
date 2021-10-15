@@ -294,7 +294,7 @@ func (c *client) DeleteTemplate(templateID string) (*TaskRefResponse, error) {
 }
 
 func (c *client) GetTask(refURL string) (*ExecutionResponse, error) {
-	resp, err := c.httpClient.Get(c.endpoint + refURL)
+	resp, err := c.Get(c.endpoint + refURL)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "getting task status")
@@ -359,7 +359,7 @@ func (c *client) PollTaskStatus(refURL string, timeout time.Duration) (*Executio
 func (c *client) GetPipelineConfig(app, pipelineConfigID string) (*PipelineConfig, error) {
 	url := c.pipelineConfigURL(app, pipelineConfigID)
 	logrus.WithField("url", url).Debug("getting url")
-	resp, err := c.httpClient.Get(url)
+	resp, err := c.Get(url)
 
 	if err != nil {
 		return nil, errors.Wrap(err, "getting pipeline config")

@@ -11,6 +11,8 @@ import (
 	"net/url"
 	"os"
 	"time"
+	"io"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -19,6 +21,9 @@ import (
 
 // HTTPClientFactory creates a new http.Client from the cli.Context
 type HTTPClientFactory func(cc *cli.Context) (*http.Client, error)
+
+// Making iapToken a global variable to be accessed from http methods below if exists.
+var iapToken string
 
 // DefaultHTTPClientFactory creates a basic http.Client that by default can
 // take an x509 cert/key pair for API authentication.
@@ -48,6 +53,7 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 	var certPath string
 	var keyPath string
 
+
 	if cc.GlobalIsSet("certPath") {
 		certPath = cc.GlobalString("certPath")
 	} else if os.Getenv("SPINNAKER_CLIENT_CERT") != "" {
@@ -62,7 +68,13 @@ func DefaultHTTPClientFactory(cc *cli.Context) (*http.Client, error) {
 	} else {
 		keyPath = ""
 	}
-
+	if cc.GlobalIsSet("iapToken") {
+		iapToken = cc.GlobalString("iapToken")
+	} else if os.Getenv("SPINNAKER_IAP_TOKEN") != "" {
+		iapToken = os.Getenv("SPINNAKER_IAP_TOKEN")
+	} else {
+		iapToken = ""
+	}
 	c.Transport = &http.Transport{
 		TLSClientConfig: &tls.Config{},
 	}
@@ -100,7 +112,7 @@ func (c *client) postJSON(url string, body interface{}) (resp *http.Response, re
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "marshaling body to json")
 	}
-	resp, err = c.httpClient.Post(url, "application/json", bytes.NewBuffer(payload))
+	resp, err = c.Post(url, "application/json", bytes.NewBuffer(payload))
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "posting to %s", url)
 	}
@@ -140,7 +152,7 @@ func (c *client) postForm(url string, data url.Values) (resp *http.Response, res
 }
 
 func (c *client) getJSON(url string) (resp *http.Response, respBody []byte, err error) {
-	resp, err = c.httpClient.Get(url)
+	resp, err = c.Get(url)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "posting to %s", url)
 	}
@@ -165,7 +177,7 @@ func (c *client) delete(url string) (resp *http.Response, respBody []byte, err e
 		return nil, nil, errors.Wrap(err, "failed to create delete request object")
 	}
 
-	resp, err = c.httpClient.Do(req)
+	resp, err = c.Do(req)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "failed to make delete request to %s", url)
 	}
@@ -183,3 +195,39 @@ func (c *client) delete(url string) (resp *http.Response, respBody []byte, err e
 
 	return resp, respBody, nil
 }
+
+func (c *client) Get(url string) (resp *http.Response, err error) {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, err
+
+	}
+
+	return c.Do(req)
+
+}
+
+func (c *client) PostForm(url string, data url.Values) (resp *http.Response, err error) {
+	return c.Post(url, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()))
+}
+
+func (c *client) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
+	req, err := http.NewRequest("POST", url, body)
+	if err != nil {
+		return nil, err
+
+	}
+
+	req.Header.Set("Content-Type", contentType)
+
+	return c.Do(req)
+
+}
+
+func (c *client) Do(req *http.Request) (*http.Response, error) {
+        if iapToken != "" {
+		req.Header.Add("Authorization", "Bearer " + iapToken)
+        }
+	return c.httpClient.Do(req)
+}
+
