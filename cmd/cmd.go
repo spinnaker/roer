@@ -285,6 +285,10 @@ func NewRoer(version string, clientConfig spinnaker.ClientConfig) *cli.App {
 			Name:  "apiSession, as",
 			Usage: "your active api session",
 		},
+		cli.StringFlag{
+			Name:  "iapToken, iap",
+			Usage: "your IAP bearer token",
+		},
 		cli.BoolFlag{
 			Name:  "insecure",
 			Usage: "Bypass TLS certificate validation",
